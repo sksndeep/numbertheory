@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GCD & Bézout's Identity Calculator</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 24px;
+  font-family: Arial, sans-serif;
+  background: #eff6ff; color: #172554;
+}
+main {
+  max-width: 900px; margin: auto;
+  background: white; padding: 30px;
+  border-radius: 20px; text-align: center;
+  box-shadow: 0 8px 30px #cbd5e1;
+}
+h1 { color: #3c6ec8; font-size: 34px; margin-bottom: 5px; } 
+label { font-size: 18px; font-weight: bold; display: inline-block; margin: 10px; }
+input, select, button {
+  font-size: 20px; padding: 10px;
+  margin: 8px; border-radius: 8px;
+  border: 2px solid #cbd5e1;
+}
+input:focus {
+  border-color: #3c6ec8; outline: none;
+}
+input[type=number] { width: 220px; text-align: center; font-family: monospace; }
+button {
+  background: #3c6ec8; color: white;
+  border: none; cursor: pointer;
+  transition: background 0.2s;
+  padding: 10px 24px; font-weight: bold;
+}
+button:hover { background: #284c8c; }
+.selectors-box {
+  background: #e8f0fe; padding: 15px; 
+  border-radius: 12px; margin: 15px 0;
+  display: flex; justify-content: center; align-items: center; flex-wrap: wrap;
+}
+.panel {
+  background: #f1f5f9; padding: 20px;
+  border-radius: 12px; margin-top: 20px;
+  text-align: left;
+}
+.result-box {
+  font-size: clamp(26px, 4vw, 42px);
+  color: #0f766e; font-weight: bold;
+  overflow-wrap: anywhere; margin: 15px 0;
+  text-align: center;
+  font-family: monospace;
+}
+.steps {
+  font-size: clamp(15px, 2.1vw, 19px);
+  line-height: 1.8; overflow-wrap: anywhere;
+  background: white; padding: 15px;
+  border-radius: 8px; border-left: 5px solid #3c6ec8;
+  font-family: monospace;
+  margin-bottom: 20px;
+}
+.error-msg { color: #de3100; font-weight: bold; margin: 10px 0; display: none; text-align:center;} 
+.small { color: #475569; font-size: 16px; margin: 5px 0; }
+.flex-center { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; }
+table.div-table {
+  width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 16px; background: white;
+}
+table.div-table th, table.div-table td {
+  border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;
+}
+table.div-table th { background: #e8f0fe; color: #172554; }
+</style>
+</head>
+<body>
+<main>
+<h1>Extended Euclidean Algorithm</h1>
+<p class="small">Find the GCD of two integers and discover their linear combination using Bézout's Identity.</p>
+
+<div class="selectors-box flex-center">
+  <div>
+    <label for="num-a">Integer A:</label><br>
+    <input id="num-a" type="number" value="252">
+  </div>
+  <div>
+    <label for="num-b">Integer B:</label><br>
+    <input id="num-b" type="number" value="105">
+  </div>
+</div>
+
+<div id="error-box" class="error-msg"></div>
+
+<div class="flex-center" style="margin-top: 10px;">
+  <button id="reveal">Calculate GCD & Reveal Steps</button>
+</div>
+
+<div class="panel">
+  <p class="small" style="text-align:center; font-weight:bold;">Mathematical Solution Overview</p>
+  <div id="result" class="result-box">gcd(252, 105) = 21</div>
+  <div id="bezout-result" class="small" style="text-align:center; font-family:monospace; font-size:18px; margin-bottom:15px; font-weight:bold; color:#1e293b;"></div>
+  
+  <div id="steps-container" style="display:none;">
+    <h3 style="margin-top:0; color:#3c6ec8;">Step 1: Forward Euclidean Algorithm (Finding GCD)</h3>
+    <div id="equation" class="steps"></div>
+
+    <h3 style="margin-top:25px; color:#3c6ec8;">Step 2: Backward Substitution (Bézout's Identity)</h3>
+    <div id="bezout-steps" class="steps"></div>
+  </div>
+  <p id="placeholder-text" style="text-align:center; color:#64748b; margin:0;">Click 'Calculate GCD & Reveal Steps' to inspect the mathematical breakdown.</p>
+</div>
+</main>
+
+<script>
+const inputA = document.getElementById("num-a");
+const inputB = document.getElementById("num-b");
+const errorBox = document.getElementById("error-box");
+const revealBtn = document.getElementById("reveal");
+const result = document.getElementById("result");
+const bezoutResult = document.getElementById("bezout-result");
+const stepsContainer = document.getElementById("steps-container");
+const equation = document.getElementById("equation");
+const bezoutSteps = document.getElementById("bezout-steps");
+const placeholderText = document.getElementById("placeholder-text");
+
+let isExpanded = false;
+
+function computeGCD(hideSteps = true) {
+  errorBox.style.display = "none";
+  let aVal = parseInt(inputA.value);
+  let bVal = parseInt(inputB.value);
+
+  if (hideSteps) isExpanded = false;
+
+  if (isNaN(aVal) || isNaN(bVal)) {
+    showError("Please enter valid integer numbers.");
+    return;
+  }
+
+  let originalAVal = aVal;
+  let originalBVal = bVal;
+
+  let a = Math.abs(aVal);
+  let b = Math.abs(bVal);
+
+  if (a === 0 && b === 0) {
+    showError("Both integers cannot be zero simultaneously.");
+    return;
+  }
+
+  let swapped = false;
+  if (a < b) {
+    let temp = a; a = b; b = temp;
+    swapped = true;
+  }
+
+  let steps = [];
+  let currentA = a;
+  let currentB = b;
+
+  while (currentB !== 0) {
+    let q = Math.floor(currentA / currentB);
+    let r = currentA % currentB;
+    steps.push({ a: currentA, b: currentB, q: q, r: r });
+    currentA = currentB;
+    currentB = r;
+  }
+
+  let gcd = currentA;
+
+  let s0 = 1, s1 = 0;
+  let t0 = 0, t1 = 1;
+
+  for (let i = 0; i < steps.length; i++) {
+    let q = steps[i].q;
+    let nextS = s0 - q * s1;
+    let nextT = t0 - q * t1;
+    s0 = s1; s1 = nextS;
+    t0 = t1; t1 = nextT;
+  }
+
+  let finalS = swapped ? t0 : s0;
+  let finalT = swapped ? s0 : t0;
+
+  if (originalAVal < 0) finalS = -finalS;
+  if (originalBVal < 0) finalT = -finalT;
+
+  result.textContent = `gcd(${originalAVal}, ${originalBVal}) = ${gcd}`;
+  bezoutResult.innerHTML = `Linear Combination: ${gcd} = (${finalS} &times; ${originalAVal}) + (${finalT} &times; ${originalBVal})`;
+
+  handleToggleUIState();
+
+  if (!isExpanded) return;
+
+  let html = `<table class="div-table"><tr><th>Equation (a = b &middot; q + r)</th><th>Quotient (q)</th><th>Remainder (r)</th></tr>`;
+  steps.forEach(s => {
+    html += `<tr><td>${s.a} = ${s.b} &times; ${s.q} + ${s.r}</td><td>${s.q}</td><td>${s.r}</td></tr>`;
+  });
+  html += `</table>`;
+  equation.innerHTML = html;
+
+  let bHtml = `Express equations in terms of their remainders (r = a - b &middot; q):<br><br>`;
+  let validSteps = steps.filter(s => s.r !== 0);
+  
+  if (validSteps.length === 0) {
+    bHtml += `Since one of the entry fields matches zero directly, no backward substitution iterations are required.`;
+  } else {
+    validSteps.forEach(s => {
+      bHtml += `&bull; From row: ${s.a} = ${s.b} &times; ${s.q} + ${s.r} &longrightarrow; <strong>${s.r}</strong> = ${s.a} - (${s.q} &times; ${s.b})<br>`;
+    });
+
+    bHtml += `<br>&bull; Substituting sequentially backward starting from the final non-zero remainder equation:<br><br>`;
+    
+    let currS = 1;
+    let currA_val = validSteps[validSteps.length - 1].a;
+    let currT = -validSteps[validSteps.length - 1].q;
+    let currB_val = validSteps[validSteps.length - 1].b;
+
+    bHtml += `${gcd} = ${currA_val} + (${currT} &times; ${currB_val})<br>`;
+
+    for (let i = validSteps.length - 2; i >= 0; i--) {
+      let step = validSteps[i];
+      bHtml += `${gcd} = ${currS} &times; ${currA_val} + ${currT} &times; (${step.a} - ${step.q} &times; ${step.b}) &nbsp;&nbsp;&nbsp;&nbsp; <i>[Substitute for ${step.r}]</i><br>`;
+      
+      let newS = currT;
+      let newT = currS - (currT * step.q);
+      
+      currS = newS;
+      currT = newT;
+      currA_val = step.a;
+      currB_val = step.b;
+
+      bHtml += `${gcd} = ${currS} &times; ${currA_val} + ${currT} &times; ${currB_val} &nbsp;&nbsp;&nbsp;&nbsp; <i>[Simplify terms]</i><br>`;
+    }
+    
+    bHtml += `<br><strong>Final Base Values Realignment:</strong><br>`;
+    bHtml += `${gcd} = (${finalS} &times; ${originalAVal}) + (${finalT} &times; ${originalBVal})<br>`;
+    bHtml += `Where Bézout coefficients are: s = <strong>${finalS}</strong>, t = <strong>${finalT}</strong>`;
+  }
+
+  bezoutSteps.innerHTML = bHtml;
+}
+
+function handleToggleUIState() {
+  if (!isExpanded) {
+    stepsContainer.style.display = "none";
+    placeholderText.style.display = "block";
+    placeholderText.textContent = "Click 'Calculate GCD & Reveal Steps' to inspect the mathematical breakdown.";
+    revealBtn.textContent = "Calculate GCD & Reveal Steps";
+  } else {
+    revealBtn.textContent = "Hide Steps";
+    placeholderText.style.display = "none";
+    stepsContainer.style.display = "block";
+  }
+}
+
+function showError(msg) {
+  errorBox.textContent = msg;
+  errorBox.style.display = "block";
+  result.textContent = "⚠️ Invalid Input";
+  bezoutResult.innerHTML = "";
+  equation.innerHTML = "";
+  bezoutSteps.innerHTML = "";
+  stepsContainer.style.display = "none";
+  placeholderText.style.display = "block";
+  placeholderText.textContent = "Fix input values above to proceed.";
+}
+
+inputA.addEventListener("input", () => computeGCD(true));
+inputB.addEventListener("input", () => computeGCD(true));
+
+revealBtn.addEventListener("click", () => {
+  isExpanded = !isExpanded;
+  computeGCD(false);
+});
+
+computeGCD(true);
+</script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Universal Base Arithmetic Calculator</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 24px;
+  font-family: Arial, sans-serif;
+  background: #eff6ff; color: #172554;
+}
+main {
+  max-width: 1000px; margin: auto;
+  background: white; padding: 30px;
+  border-radius: 20px; text-align: center;
+  box-shadow: 0 8px 30px #cbd5e1;
+}
+h1 { color: #3c6ec8; font-size: 34px; margin-bottom: 5px; } 
+label { font-size: 18px; font-weight: bold; display: inline-block; margin: 10px; }
+input, select, button {
+  font-size: 20px; padding: 10px;
+  margin: 8px; border-radius: 8px;
+  border: 2px solid #cbd5e1;
+}
+input:focus, select:focus {
+  border-color: #3c6ec8; outline: none;
+}
+input[type=text] { width: 280px; text-align: center; font-family: monospace; }
+button {
+  background: #3c6ec8; color: white;
+  border: none; cursor: pointer;
+  transition: background 0.2s;
+  padding: 10px 24px; font-weight: bold;
+}
+button:hover { background: #284c8c; }
+.selectors-box {
+  background: #e8f0fe; padding: 15px; 
+  border-radius: 12px; margin: 15px 0;
+  display: flex; justify-content: center; align-items: center; flex-wrap: wrap;
+}
+.panel {
+  background: #f1f5f9; padding: 20px;
+  border-radius: 12px; margin-top: 20px;
+  text-align: left;
+}
+.result-box {
+  font-size: clamp(32px, 5vw, 48px);
+  color: #0f766e; font-weight: bold;
+  overflow-wrap: anywhere; margin: 15px 0;
+  text-align: center;
+  font-family: monospace;
+}
+.steps {
+  font-size: clamp(15px, 2.1vw, 19px);
+  line-height: 1.8; overflow-wrap: anywhere;
+  background: white; padding: 15px;
+  border-radius: 8px; border-left: 5px solid #3c6ec8;
+  font-family: monospace;
+}
+.error-msg { color: #de3100; font-weight: bold; margin: 10px 0; display: none; text-align:center;} 
+.small { color: #475569; font-size: 16px; margin: 5px 0; }
+.flex-center { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; }
+table.div-table {
+  width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 16px; background: white;
+}
+table.div-table th, table.div-table td {
+  border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;
+}
+table.div-table th { background: #e8f0fe; color: #172554; }
+</style>
+</head>
+<body>
+<main>
+<h1>Universal Base Arithmetic Calculator</h1>
+<p class="small">Add and multiply numbers in Binary, Octal, Decimal, and Hexadecimal, and choose your target result base.</p>
+
+<div class="selectors-box">
+  <div>
+    <label for="base-select">Number Base:</label>
+    <select id="base-select">
+      <option value="10">Decimal (base 10)</option>
+      <option value="2">Binary (base 2)</option>
+      <option value="8">Octal (base 8)</option>
+      <option value="16">Hexadecimal (base 16)</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="op-select">Operation:</label>
+    <select id="op-select">
+      <option value="add">Addition (+)</option>
+      <option value="mul">Multiplication (×)</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="target-base">Result Base:</label>
+    <select id="target-base">
+      <option value="10">Decimal (base 10)</option>
+      <option value="2">Binary (base 2)</option>
+      <option value="8">Octal (base 8)</option>
+      <option value="16">Hexadecimal (base 16)</option>
+    </select>
+  </div>
+</div>
+
+<div class="flex-center">
+  <div>
+    <label id="label-val1" for="val1">Value 1:</label><br>
+    <input id="val1" type="text" value="15">
+  </div>
+  <div>
+    <label id="label-val2" for="val2">Value 2:</label><br>
+    <input id="val2" type="text" value="10">
+  </div>
+</div>
+
+<div id="error-box" class="error-msg"></div>
+
+<div class="flex-center" style="margin-top: 15px;">
+  <button id="reveal">Calculate & Reveal Steps</button>
+</div>
+
+<div class="panel">
+  <p class="small" style="text-align:center; font-weight:bold;">Arithmetic Result Output</p>
+  <div id="result" class="result-box">25₁₀</div>
+  <div id="steps-container" style="display:none;">
+    <h3 style="margin-top:0; color:#3c6ec8;">Step-by-Step Calculation Breakdown:</h3>
+    <div id="equation" class="steps"></div>
+  </div>
+  <p id="placeholder-text" style="text-align:center; color:#64748b; margin:0;">Click 'Calculate & Reveal Steps' to inspect the mathematical breakdown.</p>
+</div>
+</main>
+
+<script>
+const baseSelect = document.getElementById("base-select");
+const opSelect = document.getElementById("op-select");
+const targetBaseSelect = document.getElementById("target-base");
+const val1Input = document.getElementById("val1");
+const val2Input = document.getElementById("val2");
+const labelVal1 = document.getElementById("label-val1");
+const labelVal2 = document.getElementById("label-val2");
+const errorBox = document.getElementById("error-box");
+const revealBtn = document.getElementById("reveal");
+const result = document.getElementById("result");
+const stepsContainer = document.getElementById("steps-container");
+const equation = document.getElementById("equation");
+const placeholderText = document.getElementById("placeholder-text");
+
+const symbols = "0123456789ABCDEF";
+const subscripts = { 2: "₂", 8: "₈", 10: "₁₀", 16: "₁₆" };
+const names = { 2: "Binary", 8: "Octal", 10: "Decimal", 16: "Hexadecimal" };
+
+let isExpanded = false;
+
+function isValidInput(str, base) {
+  if (str.length === 0) return false;
+  for (let i = 0; i < str.length; i++) {
+    let index = symbols.indexOf(str[i]);
+    if (index === -1 || index >= base) return false;
+  }
+  return true;
+}
+
+function calculateArithmetic(hideSteps = true) {
+  errorBox.style.display = "none";
+  const base = Number(baseSelect.value);
+  const targetBase = Number(targetBaseSelect.value);
+  const op = opSelect.value;
+  
+  let raw1 = val1Input.value.trim().toUpperCase();
+  let raw2 = val2Input.value.trim().toUpperCase();
+  
+  if (hideSteps) isExpanded = false;
+
+  if (raw1 === "" || raw2 === "") {
+    showError("Input fields cannot be left blank.");
+    return;
+  }
+
+  if (!isValidInput(raw1, base) || !isValidInput(raw2, base)) {
+    showError(`Invalid characters detected. ${names[base]} only accepts valid symbols for this base.`);
+    return;
+  }
+
+  let dec1 = parseInt(raw1, base);
+  let dec2 = parseInt(raw2, base);
+  
+  let decResult = (op === 'add') ? (dec1 + dec2) : (dec1 * dec2);
+  let finalString = decResult.toString(targetBase).toUpperCase();
+  result.textContent = finalString + subscripts[targetBase];
+
+  handleToggleUIState();
+
+  if (!isExpanded) return;
+
+  let html = "";
+  let opSymbol = op === 'add' ? '+' : '×';
+  let opName = op === 'add' ? 'Addition' : 'Multiplication';
+
+  html += `<strong>Operation: ${opName} in Base ${base}</strong><br><br>`;
+
+  if (base !== 10) {
+    html += `<strong>Step 1: Convert inputs to Decimal via positional multiplication</strong><br>`;
+    html += `Value 1: ${raw1}${subscripts[base]} = ${dec1}₁₀<br>`;
+    html += `Value 2: ${raw2}${subscripts[base]} = ${dec2}₁₀<br><br>`;
+  } else {
+    html += `<strong>Step 1: Inputs are already in Decimal format</strong><br>`;
+    html += `Value 1: ${dec1}₁₀, Value 2: ${dec2}₁₀<br><br>`;
+  }
+
+  html += `<strong>Step 2: Perform arithmetic operation in Decimal</strong><br>`;
+  html += `${dec1} ${opSymbol} ${dec2} = <strong>${decResult}₁₀</strong><br><br>`;
+
+  if (targetBase !== 10) {
+    html += `<strong>Step 3: Convert Decimal result (${decResult}₁₀) to target base (${names[targetBase]}) using Successive Division</strong><br>`;
+    let temp = decResult;
+    let rows = [];
+    if (temp === 0) {
+      rows.push({ val: 0, div: targetBase, q: 0, rem: 0 });
+    } else {
+      while (temp > 0) {
+        let q = Math.floor(temp / targetBase);
+        let rem = temp % targetBase;
+        rows.push({ val: temp, div: targetBase, q: q, rem: symbols[rem] });
+        temp = q;
+      }
+    }
+
+    html += `<table class="div-table"><tr><th>Division</th><th>Quotient</th><th>Remainder</th><th>Digit</th></tr>`;
+    rows.forEach(r => {
+      html += `<tr><td>${r.val} ÷ ${r.div}</td><td>${r.q}</td><td>${r.rem}</td><td><strong>${r.rem}</strong></td></tr>`;
+    });
+    html += `</table><br>`;
+    html += `Reading remainders bottom-to-top yields: <strong>${finalString}${subscripts[targetBase]}</strong>`;
+  } else {
+    html += `<strong>Step 3: Target base is Decimal. Final calculation complete: ${decResult}₁₀</strong>`;
+  }
+
+  equation.innerHTML = html;
+}
+
+function handleToggleUIState() {
+  if (!isExpanded) {
+    stepsContainer.style.display = "none";
+    placeholderText.style.display = "block";
+    placeholderText.textContent = "Click 'Calculate & Reveal Steps' to inspect the mathematical breakdown.";
+    revealBtn.textContent = "Calculate & Reveal Steps";
+  } else {
+    revealBtn.textContent = "Hide Steps";
+    placeholderText.style.display = "none";
+    stepsContainer.style.display = "block";
+  }
+}
+
+function showError(msg) {
+  errorBox.textContent = msg;
+  errorBox.style.display = "block";
+  result.textContent = "⚠️ Invalid Input";
+  equation.innerHTML = "";
+  stepsContainer.style.display = "none";
+  placeholderText.style.display = "block";
+  placeholderText.textContent = "Fix structural input syntax parameters above to proceed.";
+}
+
+function handleBaseChange() {
+  const base = Number(baseSelect.value);
+  labelVal1.textContent = `Value 1 (${names[base]}):`;
+  labelVal2.textContent = `Value 2 (${names[base]}):`;
+
+  if (base === 10) { val1Input.value = "15"; val2Input.value = "10"; }
+  else if (base === 2) { val1Input.value = "1111"; val2Input.value = "1010"; }
+  else if (base === 8) { val1Input.value = "17"; val2Input.value = "12"; }
+  else if (base === 16) { val1Input.value = "F"; val2Input.value = "A"; }
+
+  calculateArithmetic(true);
+}
+
+baseSelect.addEventListener("change", handleBaseChange);
+targetBaseSelect.addEventListener("change", () => calculateArithmetic(true));
+opSelect.addEventListener("change", () => calculateArithmetic(true));
+val1Input.addEventListener("input", () => calculateArithmetic(true));
+val2Input.addEventListener("input", () => calculateArithmetic(true));
+
+revealBtn.addEventListener("click", () => {
+  isExpanded = !isExpanded;
+  calculateArithmetic(false);
+});
+
+handleBaseChange();
+</script>
+</body>
+</html>
