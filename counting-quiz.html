@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self Assessment: Counting</title>
+<style>
+:root{--bg:#f3f6fa;--card:#fff;--ink:#1b2430;--mute:#5b6675;--line:#d5dce6;--accent:#1f4e8c;--ok:#1e7a46;--okbg:#e6f4ec;--bad:#b3261e;--badbg:#fbeae8}
+@media (prefers-color-scheme:dark){:root{--bg:#12171f;--card:#1a212b;--ink:#e8edf4;--mute:#9aa6b6;--line:#2c3644;--accent:#7fb0ee;--ok:#5fd08d;--okbg:#17301f;--bad:#ff8a80;--badbg:#38201e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Georgia,"Times New Roman",serif;padding:20px}
+main{max-width:760px;margin:0 auto}
+h1{font-size:1.5rem;margin:.2em 0 .4em}
+h1 span{color:var(--bad)}
+.intro{color:var(--mute);font-size:.95rem;border-left:3px solid var(--accent);padding-left:14px;margin-bottom:22px}
+.intro div{margin-bottom:.5em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px}
+.bar{display:flex;justify-content:space-between;align-items:center;font:600 .9rem system-ui,sans-serif;color:var(--mute);margin-bottom:12px}
+.track{height:4px;background:var(--line);border-radius:2px;flex:1;margin:0 14px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.q{font-size:1.1rem;margin-bottom:16px}
+.opt{display:flex;gap:12px;width:100%;text-align:left;background:var(--card);color:inherit;font:inherit;border:1.5px solid var(--line);border-radius:8px;padding:11px 14px;margin-bottom:10px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt:disabled{cursor:default}
+.opt b{color:var(--accent);min-width:1.4em}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.opt .mark{margin-left:auto;font:700 1rem system-ui;padding-left:8px}
+.opt.ok .mark{color:var(--ok)}.opt.bad .mark{color:var(--bad)}
+.fb{margin-top:14px;padding:14px 16px;border-radius:8px;font-size:.97rem;background:var(--bg);border:1px solid var(--line)}
+.fb p{margin:.4em 0}.fb .tag{font-weight:700;font-family:system-ui,sans-serif}
+.fb .okt{color:var(--ok)}.fb .badt{color:var(--bad)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.btn{font:600 .95rem system-ui,sans-serif;padding:9px 18px;border-radius:7px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+@media (prefers-color-scheme:dark){.btn{color:#0d1520}}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.note{font:.88rem system-ui,sans-serif;color:var(--bad);margin-top:12px;min-height:1.2em}
+.score{text-align:center;padding:20px 0}
+.score big{display:block;font-size:3rem;font-weight:700;color:var(--accent)}
+.hide{display:none}
+sup,sub{line-height:0}
+</style>
+</head>
+<body>
+<main>
+<h1 id="title"><span>Self Assessment:</span> Counting</h1>
+<div class="intro">
+<div>The product rule allows you to break up a complicated counting problem into a sequence of smaller, hopefully simpler, ones. It states that if a procedure can be broken into a sequence of two tasks, where the first task can be done in *m* ways and the second task can be done in *n* ways regardless of how the first task was done, then the two-step procedure can be done in *mn* ways. (The rule extends to three or more tasks.) As a general suggestion, try to draw a picture (such as a row of blanks) that lets you visualize the steps, and decide whether repeated objects are allowed or forbidden.</div>
+<div>Given *n* distinct objects, a *k*-permutation is an arrangement of *k* of the *n* objects where order matters. The number of *k*-permutations is *P*(*n*, *k*) = *n*(*n* − 1)(*n* − 2) . . . (*n* − (*k* − 1)) = *n*!/(*n* − *k*)!. This comes from using the product rule over and over: *n* choices for the first place, *n* − 1 for the second, and so on.</div>
+<div>A *k*-combination is a selection of *k* of the *n* objects where order does not matter. The number of *k*-combinations is *C*(*n*, *k*) = *n*!/((*n* − *k*)! *k*!), the number of *k*-permutations divided by *k*!, since ordered arrangements are now considered the same in groups of size *k*!.</div>
+<div>The sum rule states that if a first task can be done in *m* ways and a second task in *n* ways, and there is no overlap in the outcomes, then there are *m* + *n* ways in which one of these tasks can be done. In set terms, |*A* ∪ *B*| = |*A*| + |*B*| if *A* and *B* have no elements in common.</div>
+<div>If the two tasks can have outcomes in common, use the inclusion-exclusion principle: |*A* ∪ *B*| = |*A*| + |*B*| − |*A* ∩ *B*|. (This also extends to three or more tasks.)</div>
+</div>
+
+<section class="card" id="quiz">
+<div class="bar"><span id="count"></span><div class="track"><i id="prog"></i></div><button class="btn ghost" id="restart">Restart quiz</button></div>
+<div class="q" id="q"></div>
+<div id="opts"></div>
+<div class="fb hide" id="fb" aria-live="polite"></div>
+<div class="nav"><button class="btn ghost" id="prev">Previous</button><button class="btn" id="next">Next</button></div>
+<div class="note" id="note"></div>
+</section>
+
+<section class="card hide" id="result">
+<div class="score">Your score is<big id="sc"></big>out of <span id="tot"></span></div>
+<div class="nav"><button class="btn ghost" id="review">Review answers</button><button class="btn" id="again">Restart quiz</button></div>
+</section>
+</main>
+
+<script>
+// Markup shorthand: *italic*  ^sup^  ~sub~
+const fmt = s => s.replace(/\*(.+?)\*/g,'<i>$1</i>').replace(/\^(.+?)\^/g,'<sup>$1</sup>').replace(/~(.+?)~/g,'<sub>$1</sub>');
+
+const DATA = [
+{q:"How many different license plates are available if the license plate pattern consists of three letters that cannot be repeated followed by three digits that can be repeated? (Assume that all letters are uppercase and the digits are 0, 1, . . . , 9.)",
+ a:[2],
+ o:[
+ ["26^3^ · 10^3^.","The factor 26^3^ in this response assumes that the letters can be repeated, which is not the case."],
+ ["*C*(26, 3) · 10^3^.","The factor *C*(26, 3) assumes that the order in which the letters appear does not matter, which is not the case; for example, ABC on a license plate is not the same as CAB."],
+ ["26 · 25 · 24 · 10^3^.","Since the letters cannot be repeated and order matters, three distinct letters can be placed in 26·25·24 ways. Since three digits are chosen with repetition allowed, they can be chosen in 10^3^ ways. By the product rule, the answer is 26·25·24·10^3^."],
+ ["*C*(26, 3) · *C*(10, 3).","The factor *C*(26, 3) assumes that the order of the letters does not matter, which is not the case. Also, *C*(10, 3) assumes that the order of the digits does not matter and that the three digits are distinct, which is not the case. For example, ABC577 is not the same plate as CAB757."],
+ ["26 · 25 · 24 · 10 · 1 · 1.","The product 26·25·24 correctly describes the number of ways of placing three non-repeating letters, but 10·1·1 assumes that the same digit is used three times, which is not the case. The three digits are not required to be the same."]
+ ]},
+{q:"A class consists of 12 women and 10 men. How many ways are there to form a committee of size six if the committee has more women than men?",
+ a:[2],
+ o:[
+ ["*C*(12, 4)·*C*(10, 2).","This response counts only the committees of four women and two men. But you also need to count the committees of five women and one man, and those of six women and no men."],
+ ["(*C*(12, 4)·*C*(10, 2)) · (*C*(12, 5)·*C*(10, 1)) · (*C*(12, 6)·*C*(10, 0)).","This response multiplies the number of committees with four women and two men, five women and one man, and six women and no men. You do not want to use the product rule."],
+ ["*C*(12, 4)·*C*(10, 2) + *C*(12, 5)·*C*(10, 1) + *C*(12, 6)·*C*(10, 0).","You use the sum rule to count the committees of four women and two men OR five women and one man OR six women and no men. Doing this, you obtain *C*(12, 4)·*C*(10, 2) + *C*(12, 5)·*C*(10, 1) + *C*(12, 6)·*C*(10, 0)."],
+ ["*C*(22, 6) − [*C*(10, 6)·*C*(12, 0) − *C*(10, 5)·*C*(12, 1) − *C*(10, 4)·*C*(12, 2)].","This response selects all committees of size six and subtracts the ones with more men than women. However, it does not subtract the committees that consist of three women and three men. If this were also subtracted, the correct answer would be obtained."]
+ ]},
+{q:"Assume that you have an ordinary deck of 52 playing cards. How many possible 7-card poker hands are there that contain at least one face card (Jack, Queen, or King)?",
+ a:[0],
+ o:[
+ ["*C*(52, 7) − *C*(40, 7).","This response counts the 7-card hands that have at least one face card. It counts all possible 7-card hands and subtracts the number of hands that contain 7 of the 40 non-face cards."],
+ ["*C*(12, 1) · *C*(40, 6).","This response counts the 7-card hands that contain exactly one face card. You need to count the hands that have at least one face card."],
+ ["*C*(4, 1) · *C*(4, 1) · *C*(4, 1) · *C*(40, 4).","This response counts the 7-card hands that have exactly one King, exactly one Queen, and exactly one Jack. You need to count the hands that have at least one face card."],
+ ["*C*(12, 3) · *C*(40, 4).","This response counts the 7-card hands that contain three face cards. You need to count the hands that have at least one face card."]
+ ]},
+{q:"Assume that you have an ordinary deck of 52 playing cards. How many possible 7-card poker hands are there that contain exactly one ace and one king?",
+ a:[0],
+ o:[
+ ["*C*(4, 1)·*C*(4, 1)·*C*(44, 5). (Choose an ace and a king, and then choose five cards from the other 11 ranks.)","There are 4 choices for an ace, 4 choices for a king, and *C*(44, 5) choices for 5 cards from the ranks other than aces and kings."],
+ ["*C*(8, 2)·*C*(44, 5). (Choose two cards from the aces and kings, and then choose five cards from the other 11 ranks.)","*C*(8, 2) groups together the aces and kings and allows you to choose any two from this set. The choices include two aces or two kings."],
+ ["52 · 48 · (44 · 43 · 42 · 41 · 40). (Choose an ace, choose a king, and then choose five cards from the other 11 ranks.)","Order does not matter. Also, how does this product select an ace and a king?"],
+ ["*C*(52, 7) − *C*(44, 7). (Count the total number of 7-card hands, and subtract the number of hands that consist of all 7 cards from the other 11 ranks.)","This difference counts all 7-card hands that have at least one ace or king."]
+ ]},
+{q:"A class consists of 12 women and 10 men. How many ways are there to form a committee of size six if the committee has equal numbers of women and men?",
+ a:[1],
+ o:[
+ ["*C*(12, 3) + *C*(10, 3).","This response selects EITHER three women OR three men; it does not select six students. The committee must consist of three women AND three men."],
+ ["*C*(12, 3) · *C*(10, 3).","The committee must consist of three women and three men. The order of selection does not matter. By the product rule the number of such selections is *C*(12, 3)·*C*(10, 3)."],
+ ["*C*(22, 6).","The term *C*(22, 6) selects 6 of the 22 students but does not take into account that three women and three men must be chosen. It includes committees of 4 women and 2 men, or 1 woman and 5 men, etc."],
+ ["*C*(22, 6) − *C*(12, 6) − *C*(10, 6).","The term *C*(22, 6) selects 6 of the 22 students, and subtracting *C*(12, 6) and *C*(10, 6) excludes the all-women and all-men committees. But this does not leave only the committees with three women and three men; the committee must consist of three women AND three men."]
+ ]},
+{q:"You have 12 balls, numbered 1 through 12, which you want to place into 4 boxes, numbered 1 through 4. If boxes can remain empty, in how many ways can the 12 balls be distributed among the 4 boxes?",
+ a:[0],
+ o:[
+ ["4^12^.","There are four choices for a box in which to place ball 1, four choices for ball 2, etc. The multiplication principle gives 4·4· · · 4·4 = 4^12^."],
+ ["12^4^.","You need to perform a sequence of 12 tasks: place ball 1, place ball 2, etc. Use the multiplication principle."],
+ ["*C*(12, 4).","This response chooses a set of 4 out of 12 objects. You need to perform a sequence of 12 tasks: place ball 1, place ball 2, etc. Use the multiplication principle."],
+ ["*P*(12, 4).","This response chooses an ordered list of 4 out of 12 objects. You need to perform a sequence of 12 tasks: place ball 1, place ball 2, etc."],
+ ["12!/4!.","This response is the product of eight integers 12·11· · · 6·5. You need to perform a sequence of 12 tasks: place ball 1, place ball 2, etc."]
+ ]},
+{q:"A dormitory has 40 students — 12 sophomores, 8 juniors, and 20 seniors. Which of the following is equal to the number of ways to put all 40 in a row for a picture, with all 12 sophomores on the left, all 8 juniors in the middle, and all 20 seniors on the right?",
+ a:[1],
+ o:[
+ ["*C*(12, 12) · *C*(8, 8) · *C*(20, 20).","This number is equal to 1, which is clearly not correct. The order of the arrangement of each class matters. Consider first placing the 12 sophomores, then the 8 juniors, and finally the 20 seniors."],
+ ["12! · 8! · 20!.","By the product rule, place the 12 sophomores (12! ways, since order matters), then the 8 juniors (8! ways), and finally the 20 seniors (20! ways). This yields 12!·8!·20!."],
+ ["40!/3.","The number 40! allows any arrangement of the 40 students; it does not keep students in the same class together. Dividing by 3 will not yield the number of desired arrangements. Consider first placing the 12 sophomores, then the 8 juniors, and finally the 20 seniors."],
+ ["40!/(12! · 8! · 20!).","The number 40! allows any arrangement of the 40 students. Dividing by 12!·8!·20! essentially says that the order in which students of the same class are placed does not matter. Consider first placing the 12 sophomores, then the 8 juniors, and finally the 20 seniors."]
+ ]},
+{q:"A dormitory has 40 students — 12 sophomores, 8 juniors, and 20 seniors. Which of the following is equal to the number of ways to form a committee of five students from the same class?",
+ a:[3],
+ o:[
+ ["*C*(40, 5)/3.","*C*(40, 5) allows any mixture of five students, which could include students from more than one class. Dividing by three will not force the selection to come from a single class. You need to select five sophomores or five juniors or five seniors, where the order of selection does not matter."],
+ ["*P*(12, 5) + *P*(8, 5) + *P*(20, 5).","You have counted the ways of selecting five sophomores or five juniors or five seniors, but you are counting as different the various orders in which each group of five can be selected. The order does not matter."],
+ ["*P*(12, 5) · *P*(8, 5) · *P*(20, 5).","You are counting the ways of selecting fifteen students: five sophomores AND five juniors AND five seniors. Also, here the order in which each group of five is selected matters. You need five sophomores OR five juniors OR five seniors, and order does not matter."],
+ ["*C*(12, 5) + *C*(8, 5) + *C*(20, 5).","This response uses the sum rule to count the committees of five sophomores or five juniors or five seniors."],
+ ["*C*(12, 5) · *C*(8, 5) · *C*(20, 5).","You are counting the ways of selecting fifteen students: five sophomores AND five juniors AND five seniors. You need five sophomores OR five juniors OR five seniors."]
+ ]},
+{q:"How many different ways are there to select a committee consisting of three members of the U. S. Senate and three members of the U. S. House of Representatives? (There are 100 members of the U. S. Senate and 435 members of the U. S. House of Representatives.)",
+ a:[0],
+ o:[
+ ["*C*(435, 3) · *C*(100, 3).","There are *C*(435, 3) ways to pick three members of the House and *C*(100, 3) ways to pick three members of the Senate. By the product rule, there are *C*(435, 3)·*C*(100, 3) ways to pick both."],
+ ["*C*(435, 3) + *C*(100, 3).","You need to pick three members of the House of Representatives AND three members of the Senate."],
+ ["*C*(535, 6).","This response allows any choice of six people. It does not count only the choices with three members of the House and three members of the Senate."],
+ ["435 · 434 · 433 · 100 · 99 · 98.","This response assumes that the order in which the six people were chosen matters. But it does not."],
+ ["435 · 434 · 433 + 100 · 99 · 98.","This response assumes that the order in which the people were chosen matters, which it does not. Also, it assumes you are choosing only three people — either three from the House or three from the Senate."]
+ ]},
+{q:"How many strings of all the first seven letters of the alphabet (A, B, C, D, E, F, G) are there that contain no repeated letters and begin or end with a vowel (A or E)?",
+ a:[2],
+ o:[
+ ["7! − 5!.","You are failing to take into account the restriction that the strings must begin or end with a vowel. The term 7! allows any of the seven letters in the first and last places. Begin by counting the strings that begin with a vowel."],
+ ["2·6! + 2·6!.","You have taken into account the restriction that the strings begin or end with a vowel. However, you have counted some strings twice."],
+ ["2·6! + 2·6! − 2·5!.","Count the strings that begin with a vowel, plus the strings that end with a vowel, minus the strings counted twice. If a string begins with a vowel, there are two choices (A or E) for the first letter and then 6! ways to place the remaining six letters. Likewise, if it ends with a vowel there are 2·6! strings. Strings that both begin and end with a vowel (A…E and E…A) were counted twice. There are 2·5! of them, which we subtract to obtain 2·6! + 2·6! − 2·5!."],
+ ["6! + 6! − 5!.","Your basic technique was correct: add the strings that begin with a vowel and the strings that end with a vowel, then subtract those counted twice. However, the strings that begin with a vowel could begin with either A or E. Likewise, the strings that end in a vowel could end with A or E."],
+ ["6! + 6!.","You are not taking into account that there are two choices for vowels. Also, you need to take into account that you are counting some strings twice."]
+ ]},
+{q:"How many different license plates are available if the license plate pattern consists of four letters followed by three digits? (Assume that all letters are uppercase and the digits are 0, 1, . . . , 9.)",
+ a:[3],
+ o:[
+ ["26 · 25 · 24 · 23 · 10 · 9 · 8.","This would be correct if letters could only be used once and digits could only be used once, but letters and digits can be used more than once."],
+ ["26^4^ · 10 · 9 · 8.","You cannot assume that digits cannot be repeated."],
+ ["26^4^ + 10^3^.","This gives the number of license plates that have either four letters OR three digits. But you must have four letters AND three digits."],
+ ["26^4^ · 10^3^.","Because there are 26 possible choices for each letter and 10 choices for each digit, the product rule tells us there are 26^4^·10^3^ different license plates."],
+ ["*C*(26, 4) · *C*(10, 3) (where *C*(26, 4) = 26!/(4!·22!) and *C*(10, 3) = 10!/(3!·7!)).","This is not correct because the order of the letters and the order of the digits matter, and because letters and digits can be repeated."]
+ ]},
+{q:"How many different passwords are possible if each password consists of six characters where each character is either an uppercase letter, a lowercase letter, or a digit, and at least one digit must be included in the password? (There are 26 possible uppercase letters, 26 possible lowercase letters, and 10 possible digits.)",
+ a:[3],
+ o:[
+ ["62^6^ − 10^6^.","There are (26 + 26 + 10)^6^ = 62^6^ possible strings of six characters, each a letter or a digit. However, some are not valid passwords because they have no digits."],
+ ["62^6^ − 26^6^.","There are 62^6^ possible strings of six characters, each a letter or a digit. However, some are not valid passwords because they have no digits."],
+ ["62^6^ − 36^6^.","There are 62^6^ possible strings of six characters, each a letter or a digit. However, some are not valid passwords because they have no digits."],
+ ["62^6^ − 52^6^.","There are 62^6^ possible strings of six characters, each a letter or a digit. Of these, 52^6^ are not valid because they consist entirely of uppercase or lowercase letters. Consequently, there are 62^6^ − 52^6^ valid passwords."]
+ ]},
+{q:"How many bit strings (strings of 0’s and 1’s) are there of length 7 that have more 0’s than 1’s?",
+ a:[0],
+ o:[
+ ["2^7^/2.","There are 2^7^ bit strings of length 7. Half have more 0’s than 1’s and half have more 1’s than 0’s, so the answer is 2^7^/2 = 2^6^. We could also write it as *C*(7, 4) + *C*(7, 5) + *C*(7, 6) + *C*(7, 7), adding the number of strings with exactly 4, 5, 6, or 7 0’s."],
+ ["2^4^ + 2^5^ + 2^6^ + 2^7^.","This response counts the bit strings of lengths 4, 5, 6, and 7. But the question asks for strings of length 7."],
+ ["*C*(7, 4) · *C*(7, 5) · *C*(7, 6) · *C*(7, 7).","This response would be correct if the product were replaced by a sum. In that case we would be counting the ways of choosing 4, 5, 6, or 7 places (out of 7) to put 0’s."],
+ ["2 · 2 · 2 · 1 · 1 · 1 · 1.","This response says there are two choices for a bit in the first three positions and only one way to fill the last four (with 0’s). But this does not count all bit strings of length 7 with more 0’s than 1’s."]
+ ]}
+];
+
+const $ = id => document.getElementById(id);
+const L = 'ABCDE';
+let cur, picks, reviewing;
+
+function start(){ cur = 0; picks = DATA.map(() => null); reviewing = false;
+  $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); }
+
+function show(){
+  const d = DATA[cur], p = picks[cur];
+  $('count').textContent = 'Question ' + (cur+1) + ' of ' + DATA.length;
+  $('prog').style.width = ((cur+1)/DATA.length*100) + '%';
+  $('q').innerHTML = fmt(d.q);
+  $('note').textContent = '';
+  const box = $('opts'); box.innerHTML = '';
+  d.o.forEach((o,i) => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.disabled = p !== null;
+    b.innerHTML = '<b>' + L[i] + ')</b><span>' + fmt(o[0]) + '</span>';
+    if (p === i) { const ok = d.a.includes(i); b.classList.add(ok?'ok':'bad'); b.insertAdjacentHTML('beforeend','<span class="mark">'+(ok?'✓':'✗')+'</span>'); }
+    b.onclick = () => { picks[cur] = i; show(); };
+    box.appendChild(b);
+  });
+  const fb = $('fb');
+  if (p === null) fb.classList.add('hide');
+  else { const ok = d.a.includes(p);
+    fb.innerHTML = '<span class="tag '+(ok?'okt':'badt')+'">'+L[p]+') ['+(ok?'CORRECT':'INCORRECT')+']</span> ' + fmt(d.o[p][1]);
+    fb.classList.remove('hide'); }
+  $('prev').style.visibility = cur === 0 ? 'hidden' : 'visible';
+  $('next').textContent = cur === DATA.length-1 ? 'See results' : 'Next';
+}
+
+function results(){
+  const score = picks.filter((p,i) => p !== null && DATA[i].a.includes(p)).length;
+  $('sc').textContent = score; $('tot').textContent = DATA.length;
+  $('quiz').classList.add('hide'); $('result').classList.remove('hide');
+}
+
+$('next').onclick = () => {
+  if (cur < DATA.length-1) { cur++; show(); return; }
+  if (picks.includes(null)) { $('note').textContent = 'Answer all the questions to see your score.'; return; }
+  results();
+};
+$('prev').onclick = () => { if (cur > 0) { cur--; show(); } };
+$('restart').onclick = $('again').onclick = start;
+$('review').onclick = () => { cur = 0; $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); };
+
+document.querySelectorAll('.intro div').forEach(n => n.innerHTML = fmt(n.innerHTML));
+start();
+</script>
+</body>
+</html>

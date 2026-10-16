@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self Assessment: Recurrence Relations</title>
+<style>
+:root{--bg:#f3f6fa;--card:#fff;--ink:#1b2430;--mute:#5b6675;--line:#d5dce6;--accent:#1f4e8c;--ok:#1e7a46;--okbg:#e6f4ec;--bad:#b3261e;--badbg:#fbeae8}
+@media (prefers-color-scheme:dark){:root{--bg:#12171f;--card:#1a212b;--ink:#e8edf4;--mute:#9aa6b6;--line:#2c3644;--accent:#7fb0ee;--ok:#5fd08d;--okbg:#17301f;--bad:#ff8a80;--badbg:#38201e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Georgia,"Times New Roman",serif;padding:20px}
+main{max-width:760px;margin:0 auto}
+h1{font-size:1.5rem;margin:.2em 0 .4em}
+h1 span{color:var(--bad)}
+.intro{color:var(--mute);font-size:.95rem;border-left:3px solid var(--accent);padding-left:14px;margin-bottom:22px}
+.intro div{margin-bottom:.5em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px}
+.bar{display:flex;justify-content:space-between;align-items:center;font:600 .9rem system-ui,sans-serif;color:var(--mute);margin-bottom:12px}
+.track{height:4px;background:var(--line);border-radius:2px;flex:1;margin:0 14px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.q{font-size:1.1rem;margin-bottom:16px}
+.opt{display:flex;gap:12px;width:100%;text-align:left;background:var(--card);color:inherit;font:inherit;border:1.5px solid var(--line);border-radius:8px;padding:11px 14px;margin-bottom:10px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt:disabled{cursor:default}
+.opt b{color:var(--accent);min-width:1.4em}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.opt .mark{margin-left:auto;font:700 1rem system-ui;padding-left:8px}
+.opt.ok .mark{color:var(--ok)}.opt.bad .mark{color:var(--bad)}
+.fb{margin-top:14px;padding:14px 16px;border-radius:8px;font-size:.97rem;background:var(--bg);border:1px solid var(--line)}
+.fb p{margin:.4em 0}.fb .tag{font-weight:700;font-family:system-ui,sans-serif}
+.fb .okt{color:var(--ok)}.fb .badt{color:var(--bad)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.btn{font:600 .95rem system-ui,sans-serif;padding:9px 18px;border-radius:7px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+@media (prefers-color-scheme:dark){.btn{color:#0d1520}}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.note{font:.88rem system-ui,sans-serif;color:var(--bad);margin-top:12px;min-height:1.2em}
+.score{text-align:center;padding:20px 0}
+.score big{display:block;font-size:3rem;font-weight:700;color:var(--accent)}
+.hide{display:none}
+sup,sub{line-height:0}
+</style>
+</head>
+<body>
+<main>
+<h1 id="title"><span>Self Assessment:</span> Recurrence Relations</h1>
+<div class="intro">
+<div>A recurrence relation for a sequence *a*~0~, *a*~1~, *a*~2~, *a*~3~, . . . is an equation that relates *a*~*n*~ to one or more previous terms in the sequence. An initial condition is a value for the first term (or terms) in the sequence.</div>
+<div>A formula for a recurrence relation is a rule that allows you to evaluate *a*~*n*~ directly.</div>
+</div>
+
+<section class="card" id="quiz">
+<div class="bar"><span id="count"></span><div class="track"><i id="prog"></i></div><button class="btn ghost" id="restart">Restart quiz</button></div>
+<div class="q" id="q"></div>
+<div id="opts"></div>
+<div class="fb hide" id="fb" aria-live="polite"></div>
+<div class="nav"><button class="btn ghost" id="prev">Previous</button><button class="btn" id="next">Next</button></div>
+<div class="note" id="note"></div>
+</section>
+
+<section class="card hide" id="result">
+<div class="score">Your score is<big id="sc"></big>out of <span id="tot"></span></div>
+<div class="nav"><button class="btn ghost" id="review">Review answers</button><button class="btn" id="again">Restart quiz</button></div>
+</section>
+</main>
+
+<script>
+// Markup shorthand: *italic*  ^sup^  ~sub~
+const fmt = s => s.replace(/\*(.+?)\*/g,'<i>$1</i>').replace(/\^(.+?)\^/g,'<sup>$1</sup>').replace(/~(.+?)~/g,'<sub>$1</sub>');
+
+const DATA = [
+{q:"You begin with a square with side length 1. At the end of minute 1 you increase the side length by 1. You continue to increase the side length by 1 at the end of each minute. Let *a*~*n*~ equal the area of the square at the end of minute *n*, immediately after you increase its side length. Which of the following is a recurrence relation for *a*~*n*~?",
+ a:[0],
+ o:[
+ ["*a*~*n*~ = *a*~*n* − 1~ + (2*n* + 1).","Assume that the larger (*n* + 1) × (*n* + 1) square is obtained from the smaller *n* × *n* square by raising the top one unit and moving the right side one unit to the right. This adds two strips of area 1 × *n* and a new 1 × 1 square in the upper right corner. The total area added is *n* + *n* + 1 = 2*n* + 1. Therefore, *a*~*n*~ = *a*~*n* − 1~ + (2*n* + 1)."],
+ ["*a*~*n*~ = *a*~*n* − 1~ + (*n* − 1)^2^.","To see how the square grows, assume the larger (*n* + 1) × (*n* + 1) square is obtained from the smaller *n* × *n* square by raising the top one unit and moving the right side one unit to the right. This adds two strips of area 1 × *n* and a new 1 × 1 square in the upper right corner."],
+ ["*a*~*n*~ = *a*~*n* − 1~^2^.","This response increases the area at a rate much too large. To see how the square grows, assume the larger (*n* + 1) × (*n* + 1) square is obtained from the smaller *n* × *n* square by raising the top one unit and moving the right side one unit to the right. This adds two strips of area 1 × *n* and a new 1 × 1 square in the upper right corner."],
+ ["*a*~*n*~ = (*n* + 1)^2^.","This response is a formula, not a recurrence relation."]
+ ]},
+{q:"The population of the United States in 2006 is approximately 298,000,000 and is growing at a rate of 1.2% per year. Let *a*~*n*~ be the population *n* years from 2006. If you want to find how long it will take for the population to double, you must find a subscript *n* such that",
+ a:[1],
+ o:[
+ ["*a*~*n*~ = 2*a*~*n* − 1~.","Having *a*~*n*~ = 2*a*~*n* − 1~ means that the population has doubled in one year. You need to have the initial population double."],
+ ["2*a*~0~ = *a*~*n*~.","The population in year *n* will be double the initial population."],
+ ["*a*~*n*~ = 2*a*~2006~.","The term *a*~2006~ will be the population 2006 years after the year 2006. You need to have the initial population double."],
+ ["*a*~2*n*~ = *a*~*n*~.","This response says that the population *n* years after 2006 is equal to the population 2*n* years after 2006. It does not convey the idea that the population must double. You need to have the initial population double."]
+ ]},
+{q:"The population of the United States in 2006 is approximately 298,000,000 and is growing at a rate of 1.2% per year. Let *a*~*n*~ be the population *n* years from 2006. Which of the following is a recurrence relation for *a*~*n*~?",
+ a:[0],
+ o:[
+ ["*a*~*n*~ = *a*~*n* − 1~ + 0.012*a*~*n* − 1~.","The population at the end of year *n* is composed of two parts — the population one year earlier (*a*~*n* − 1~) plus the “new” population (0.012*a*~*n* − 1~)."],
+ ["*a*~*n*~ = 1.2*a*~*n* − 1~.","The “growth factor” in this response is much too large — it is 20%."],
+ ["*a*~*n*~ = 1.012*a*~*n* − 1~ + 298,000,000.","You are adding 298,000,000 each year. The number 298,000,000 is *a*~0~."],
+ ["*a*~*n*~ = 0.12*a*~*n* − 1~ + 2006.","The terms in the recurrence relation measure population. The number 2006 is a year, not a population number."],
+ ["*a*~*n*~ = 0.012*a*~*n* − 1~.","The recurrence relation should measure the population each year, not the increase."],
+ ["*a*~*n*~ = 298,000,000*a*~*n* − 1~.","The number 298,000,000 is not the growth factor, but rather is *a*~0~."]
+ ]},
+{q:"The price of a stock is initially $50. Suppose that each morning the stock price increases by 2% and then in the afternoon the price decreases by 2%. Let *a*~*n*~ be the price of the stock at the end of day *n*. Which of the following is a recurrence relation for *a*~*n*~?",
+ a:[0],
+ o:[
+ ["*a*~*n*~ = (0.98 · 1.02)*a*~*n* − 1~.","On the *n*th day the price from the (*n* − 1)st day increases by 2%, yielding 1.02*a*~*n* − 1~. This price then decreases by 2%, yielding 0.98 · 1.02*a*~*n* − 1~ as *a*~*n*~, the price at the end of the *n*th day."],
+ ["*a*~*n*~ = *a*~*n* − 1~.","You are assuming that the 2% increase and the following 2% decrease cancel each other out. But they do not, because the increase is based on *a*~*n* − 1~, while the decrease is based on 1.02*a*~*n* − 1~."],
+ ["*a*~*n*~ = 1.02*a*~*n* − 1~ − 0.02*a*~*n* − 1~.","This equals (1.02 − 0.02)*a*~*n* − 1~ = *a*~*n* − 1~, which says the 2% increase and the 2% decrease cancel each other out. But they do not, because the increase is based on *a*~*n* − 1~, while the decrease is based on 1.02*a*~*n* − 1~."],
+ ["*a*~*n*~ = 1.02*a*~*n* − 1~ · 0.98*a*~*n* − 1~.","This response approximately squares the amount each day, which is much too large. Take *a*~*n* − 1~, increase it by 2%, then decrease this new amount by 2% to obtain *a*~*n*~."]
+ ]},
+{q:"Suppose inflation decreases the value of money by 3% per year. Which formula describes *a*~*n*~ = the value (in dollars) of $1000 after *n* years?",
+ a:[0],
+ o:[
+ ["*a*~*n*~ = (0.97)^*n*^ · 1000.","We are given *a*~0~ = 1000. The value after one year is *a*~1~ = *a*~0~ − 0.03*a*~0~ = 0.97*a*~0~. After two years, *a*~2~ = 0.97*a*~1~ = (0.97)^2^ · 1000. The pattern continues: *a*~3~ = (0.97)^3^ · 1000, *a*~4~ = (0.97)^4^ · 1000, and in general *a*~*n*~ = (0.97)^*n*^ · 1000."],
+ ["*a*~*n*~ = *n*(0.97)1000.","Here is one way to begin to find a formula. We are given *a*~0~ = 1000. The value after one year is *a*~1~ = 0.97*a*~0~. After two years, *a*~2~ = 0.97*a*~1~ = (0.97)^2^ · 1000. Continue until you find a general formula."],
+ ["*a*~*n*~ = −(0.03)1000.","The value *a*~*n*~ can never be a negative number. Here is one way to begin: *a*~0~ = 1000, *a*~1~ = 0.97*a*~0~, *a*~2~ = 0.97*a*~1~ = (0.97)^2^ · 1000. Continue until you find a general formula."],
+ ["*a*~*n*~ = 1000(0.03)^*n*^.","Here is one way to begin to find a formula. We are given *a*~0~ = 1000. The value after one year is *a*~1~ = 0.97*a*~0~, and after two years *a*~2~ = (0.97)^2^ · 1000. Continue until you find a general formula."]
+ ]},
+{q:"Let *a*~*n*~ = the number of bit strings of length *n* with two consecutive 0’s. Which of the following is a recurrence relation for *a*~*n*~?",
+ a:[0],
+ o:[
+ ["*a*~*n*~ = *a*~*n* − 1~ + *a*~*n* − 2~ + 2^*n* − 2^.","<p>The strings with two consecutive 0’s are of two types: those that begin with 1 and those that begin with 0. So *a*~*n*~ = (# that begin with 1) + (# that begin with 0).</p><p>The number of the first type is *a*~*n* − 1~, because the remaining *n* − 1 bits must contain two consecutive 0’s.</p><p>For strings beginning with 0, look at the second bit. If it is 1, the string begins with 01 and the two consecutive 0’s must occur in the remaining *n* − 2 places: *a*~*n* − 2~ strings. If it is 0, the string begins with 00 and already has two consecutive 0’s, so each of the remaining *n* − 2 bits can be 0 or 1: 2^*n* − 2^ strings.</p><p>In summary, *a*~*n*~ = *a*~*n* − 1~ + *a*~*n* − 2~ + 2^*n* − 2^.</p>"],
+ ["*a*~*n*~ = 2*a*~*n* − 1~ + 2*a*~*n* − 2~.","Not correct. Here is one way to begin. The strings of length *n* with two consecutive 0’s can be written as the sum of two types: those that begin with 1 and those that begin with 0. So *a*~*n*~ = (# desired strings that begin with 1) + (# desired strings that begin with 0). Now examine each type separately."],
+ ["*a*~*n*~ = 2*a*~*n* − 1~ + 2*a*~*n* − 2~ − 1.","Not correct. Here is one way to begin. The strings of length *n* with two consecutive 0’s can be written as the sum of two types: those that begin with 1 and those that begin with 0. So *a*~*n*~ = (# desired strings that begin with 1) + (# desired strings that begin with 0). Now examine each type separately."],
+ ["*a*~*n*~ = *a*~*n* − 1~ + *a*~*n* − 2~ + 2^*n*^.","Not correct. Here is one way to begin. The strings of length *n* with two consecutive 0’s can be written as the sum of two types: those that begin with 1 and those that begin with 0. So *a*~*n*~ = (# desired strings that begin with 1) + (# desired strings that begin with 0). Now examine each type separately."],
+ ["none of these.","Not correct. Here is one way to begin. The strings of length *n* with two consecutive 0’s can be written as the sum of two types: those that begin with 1 and those that begin with 0. So *a*~*n*~ = (# desired strings that begin with 1) + (# desired strings that begin with 0). Now examine each type separately."]
+ ]},
+{q:"If *a*~*n*~ = *a*~*n* − 1~^2^ and *a*~0~ = 2, then *a*~*n*~ is equal to which of the following?",
+ a:[0],
+ o:[
+ ["2<sup>2<sup>*n*</sup></sup>.","<p>If *a*~0~ = 2, then *a*~1~ = *a*~0~^2^ = 2^2^, *a*~2~ = *a*~1~^2^ = (2^2^)^2^ = 2^4^, *a*~3~ = (2^4^)^2^ = 2^8^, *a*~4~ = (2^8^)^2^ = 2^16^, *a*~5~ = (2^16^)^2^ = 2^32^. The exponents are consecutive powers of 2, so it is reasonable to guess *a*~*n*~ = 2<sup>2<sup>*n*</sup></sup>.</p><p>To verify, substitute into the recurrence: 2<sup>2<sup>*n*</sup></sup> should equal (2<sup>2<sup>*n* − 1</sup></sup>)^2^ = 2<sup>2·2<sup>*n* − 1</sup></sup> = 2<sup>2<sup>*n*</sup></sup>. It does, and the formula gives the correct *a*~0~ = 2<sup>2<sup>0</sup></sup> = 2.</p>"],
+ ["2^*n* + 1^.","The formula *a*~*n*~ = 2^*n* + 1^ generates 2, 4, 8, 16, 32, . . . But the given recurrence relation generates 2, 4, 16, 256, . . . Beginning with *a*~0~ = 2, use the recurrence to find *a*~1~ through *a*~5~, keeping the values as powers of 2 so you can discover a pattern."],
+ ["(2^*n*^)^2^.","The given recurrence generates 2, 4, 16, 256, . . . But (2^*n*^)^2^ = 2^2*n*^ generates 1, 4, 16, 64, . . . , which already differs in the first entry, *a*~0~. Beginning with *a*~0~ = 2, use the recurrence to find *a*~1~ through *a*~5~, keeping the values as powers of 2 so you can discover a pattern."],
+ ["2^2*n*^.","The given recurrence generates 2, 4, 16, 256, . . . But 2^2*n*^ generates 1, 4, 16, 64, . . . , which already differs in the first entry, *a*~0~. (Note that responses C and D are the same.) Beginning with *a*~0~ = 2, use the recurrence to find *a*~1~ through *a*~5~, keeping the values as powers of 2 so you can discover a pattern."]
+ ]},
+{q:"Suppose a sequence *a*~1~, *a*~2~, *a*~3~, . . . begins 3, 7, 3, 7, 3, 7, . . . , and this pattern continues. Which of the following is a formula for this sequence?",
+ a:[1],
+ o:[
+ ["*a*~*n*~ = 5 + (−2)^*n*^.","This generates the sequence 3, 9, −3, 21, . . . You are alternately adding powers of 2 and subtracting powers of 2. You need to alternately add 2 and subtract 2."],
+ ["*a*~*n*~ = 5 + 2(−1)^*n*^.","This formula generates the given sequence (3 for *n* = 1, 7 for *n* = 2, and so on) by taking the “middle point”, 5, between 3 and 7, and then alternately subtracting 2 and adding 2."],
+ ["*a*~*n*~ = 3 + 4^*n* − 1^.","This formula adds powers of 4, and generates 4, 7, 19, 67, . . ."],
+ ["*a*~*n*~ = *a*~*n* − 2~.","This is a recurrence relation, not a formula, for the sequence."]
+ ]},
+{q:"Suppose you are hired by a company at an initial salary of $30,000. At the end of each year you receive a 3% raise, and then an additional $1000 increase. Let *a*~*n*~ equal your salary at the end of *n* years with the company. Find a recurrence relation for *a*~*n*~.",
+ a:[0],
+ o:[
+ ["*a*~*n*~ = 1.03*a*~*n* − 1~ + 1000.","To obtain *a*~*n*~ you take the previous year’s salary, *a*~*n* − 1~, and add 3% to it, obtaining *a*~*n* − 1~ + 0.03*a*~*n* − 1~ = 1.03*a*~*n* − 1~. You then add $1000: *a*~*n*~ = 1.03*a*~*n* − 1~ + 1000."],
+ ["*a*~*n*~ = (1000 + 0.03)*a*~*n* − 1~.","You do not multiply the salary by $1000. To obtain *a*~*n*~ you take the previous year’s salary, *a*~*n* − 1~, add 3%, and then add $1000."],
+ ["*a*~*n*~ = 1.03(*a*~*n* − 1~ + 1000).","To obtain *a*~*n*~ you take the previous year’s salary, *a*~*n* − 1~, and first add 3%. After this is done, you add $1000."],
+ ["none of these.","To obtain *a*~*n*~ you take the previous year’s salary, *a*~*n* − 1~, add 3%, and then add $1000."]
+ ]},
+{q:"Suppose *a*~*n*~ = *a*~*n* − 1~ + 2^*n*^. Then *a*~*n*~ is equal to which of the following?",
+ a:[0],
+ o:[
+ ["*a*~*n* − 2~ + 2^*n*^ + 2^*n* − 1^.","We are given *a*~*n*~ = *a*~*n* − 1~ + 2^*n*^. Using *n* − 1 in place of *n* gives *a*~*n* − 1~ = *a*~*n* − 2~ + 2^*n* − 1^. Substituting for *a*~*n* − 1~ yields *a*~*n*~ = (*a*~*n* − 2~ + 2^*n* − 1^) + 2^*n*^."],
+ ["*a*~*n* − 2~ + 2^*n* + 1^.","Use *n* − 1 in place of *n* to obtain *a*~*n* − 1~ = *a*~*n* − 2~ + 2^*n* − 1^. Now substitute for *a*~*n* − 1~ in the first recurrence relation to obtain *a*~*n*~ in terms of *a*~*n* − 2~."],
+ ["*a*~*n* − 2~ + 2^*n*^.","Use *n* − 1 in place of *n* to obtain *a*~*n* − 1~ = *a*~*n* − 2~ + 2^*n* − 1^. Now substitute for *a*~*n* − 1~ in the first recurrence relation to obtain *a*~*n*~ in terms of *a*~*n* − 2~."],
+ ["*a*~*n* − 2~ + 2^*n* − 1^.","Use *n* − 1 in place of *n* to obtain *a*~*n* − 1~ = *a*~*n* − 2~ + 2^*n* − 1^. Now substitute for *a*~*n* − 1~ in the first recurrence relation to obtain *a*~*n*~ in terms of *a*~*n* − 2~."]
+ ]},
+{q:"The general solution to the recurrence relation *a*~*n*~ = 3*a*~*n* − 1~ + 10*a*~*n* − 2~ is *a*~*n*~ = *c*·5^*n*^ + *d*·(−2)^*n*^. Which of the following is a particular solution?",
+ a:[2],
+ o:[
+ ["−2^*n*^.","If you took *c* = 0 and *d* = 1, you obtain the particular solution *a*~*n*~ = (−2)^*n*^, but (−2)^*n*^ is not equal to −2^*n*^."],
+ ["3^*n*^.","If you took *c* = 1 and *d* = 1, you obtain *a*~*n*~ = 5^*n*^ + (−2)^*n*^, but laws of exponents do not allow you to rewrite this as (5 − 2)^*n*^."],
+ ["5^*n* + 1^ + (−2)^*n*^.","This particular solution is obtained by taking *c* = 5 and *d* = 1. This gives *a*~*n*~ = 5·5^*n*^ + 1·(−2)^*n*^ = 5^*n* + 1^ + (−2)^*n*^."],
+ ["3^*n* − 1^ + 10^*n* − 2^.","All solutions have the form *a*~*n*~ = *c*·5^*n*^ + *d*·(−2)^*n*^. (The coefficients 3 and 10 were used to obtain the numbers 5 and −2.)"]
+ ]},
+{q:"Which of the following is a recurrence relation for the sequence that begins 3, 6, 9, 12, 15, . . .?",
+ a:[0],
+ o:[
+ ["*a*~*n*~ = *a*~*n* − 2~ + 6.","You can take the second previous term, *a*~*n* − 2~, and add 6 to it to get *a*~*n*~. Note that *a*~*n*~ = *a*~*n* − 1~ + 3 is also a recurrence relation for the sequence."],
+ ["*a*~*n*~ = 3*n*.","The expression 3*n* is a formula for the sequence; it is not a recurrence relation."],
+ ["*a*~*n*~ = 3*a*~*n* − 1~.","This recurrence relation triples each previous term. Beginning with *a*~0~ = 3, it generates 3, 9, 27, 81, 243, . . ."],
+ ["*a*~*n*~ = *a*~*n* − 1~ + 3*n*.","This recurrence relation adds larger and larger numbers to generate the new terms. You need to always add 3 to the previous term to generate the next term."]
+ ]},
+{q:"Which of the following is a recurrence relation for the sequence 2, 3, 5, 8, 12, 17, 23, 30, . . .? Assume that the sequence begins with the term called *a*~1~.",
+ a:[0],
+ o:[
+ ["*a*~*n*~ = *a*~*n* − 1~ + (*n* − 1).","The terms are generated by adding 1, 2, 3, 4, . . . to the previous term: to obtain *a*~2~ from *a*~1~, add 1; to obtain *a*~3~ from *a*~2~, add 2; and so on. In general, to obtain *a*~*n*~ from *a*~*n* − 1~, add the subscript of the previous term, *n* − 1."],
+ ["*a*~*n*~ = 2*a*~*n* − 1~ − 1.","This doubles the previous term and then subtracts 1. It yields 2, 3, 5, 9, 17, 33, 65, . . . , which agrees with the given sequence in the first three terms but grows much faster. Examine the difference between consecutive terms."],
+ ["*a*~*n*~ = *a*~*n* − 1~ + *a*~*n* − 2~.","This is the recurrence relation for the Fibonacci sequence. It agrees with the given sequence in the first four terms, but differs after that. Examine the difference between consecutive terms."],
+ ["*a*~*n*~ = *a*~*n* − 1~ + *n*.","You are close, but not exact. If you begin with *a*~1~ = 2, this generates 2, 4, 7, 11, 16, 22, 29, . . . It would be correct if the sequence began with the term called *a*~0~. Write out the differences *a*~2~ − *a*~1~, *a*~3~ − *a*~2~, and *a*~4~ − *a*~3~ to see what must be added."]
+ ]},
+{q:"Which of the following is a formula for the sequence 3, 6, 12, 24, 48, . . .? Assume that the first term in the sequence is called *a*~0~.",
+ a:[4],
+ o:[
+ ["*a*~*n*~ = 3 · 2^*n* − 1^.","This would be correct if the first term were called *a*~1~. However, the first term is called *a*~0~. You need to adjust the exponent to obtain the correct formula."],
+ ["*a*~*n*~ = 3*n* + 3.","The sequence generated by this formula is 3, 6, 9, 12, 15, 18, . . . You need a formula that doubles the previous term to obtain the next term."],
+ ["*a*~*n*~ = 2*a*~*n* − 1~.","This is a correct recurrence relation, but it is not a formula. Your answer must be a formula."],
+ ["*a*~*n*~ = 3(*n* + 1).","The sequence generated by this formula is 3, 6, 9, 12, 15, 18, . . . You need a formula that doubles the previous term to obtain the next term."],
+ ["none of these.","None of the responses A through D provides a formula that yields the given sequence. A formula that generates it is *a*~*n*~ = 3 · 2^*n*^. Response A, *a*~*n*~ = 3 · 2^*n* − 1^, is close, but the exponent is not correct."]
+ ]},
+{q:"Suppose *a*~*n*~ = 2*a*~*n* − 1~ + 2*n* + 1. Then *a*~*n* − 1~ is equal to which of the following?",
+ a:[0],
+ o:[
+ ["2*a*~*n* − 2~ + 2*n* − 1.","The recurrence says *a*~*n*~ is obtained by doubling the previous term, adding two times its own subscript, and adding 1. So *a*~*n* − 1~ is obtained by doubling *a*~*n* − 2~, adding two times its subscript (*n* − 1), and adding 1: *a*~*n* − 1~ = 2*a*~*n* − 2~ + 2(*n* − 1) + 1 = 2*a*~*n* − 2~ + 2*n* − 1."],
+ ["2*a*~*n* − 2~ + 2*n*.","Doubling the previous term is correct, but you do not want to add 2*n*. The recurrence says *a*~*n*~ is obtained by doubling the previous term, adding two times the subscript, and adding 1. Rephrase this using *n* − 1 in place of *n*."],
+ ["2*a*~*n* − 2~ + 2*n* + 1.","Doubling the previous term is correct, but you do not want to add 2*n* + 1. The recurrence says *a*~*n*~ is obtained by doubling the previous term, adding two times the subscript, and adding 1. Rephrase this using *n* − 1 in place of *n*."],
+ ["none of these.","One of the responses A through C is correct. The recurrence says *a*~*n*~ is obtained by doubling the previous term, adding two times the subscript, and adding 1. Rephrase this using *n* − 1 in place of *n*."]
+ ]},
+{q:"Suppose you begin with one pair of newborn rabbits. At the end of the third month, and at the end of every month thereafter, they give birth to two pairs of rabbits. Each pair of offspring reproduces according to the same rule. Assume that none of the rabbits die. Let *f*~*n*~ be the number of pairs of rabbits at the end of month *n*, just after the new pairs have been born. We have *f*~1~ = 1, *f*~2~ = 1, and *f*~3~ = 3. Which of the following is a recurrence relation for *f*~*n*~?",
+ a:[0],
+ o:[
+ ["*f*~*n*~ = *f*~*n* − 1~ + 2*f*~*n* − 3~.","At the end of month *n*, the total population, *f*~*n*~, is composed of two parts: the pairs alive one month earlier (*f*~*n* − 1~) and the newborn pairs. Newborns are born to parents who were alive three months ago — there are *f*~*n* − 3~ such pairs. Each gives birth to two pairs, so there are 2*f*~*n* − 3~ newborn pairs. Therefore *f*~*n*~ = *f*~*n* − 1~ + 2*f*~*n* − 3~."],
+ ["*f*~*n*~ = *f*~*n* − 1~ + *f*~*n* − 3~.","The total population is made up of the pairs alive one month earlier (*f*~*n* − 1~) and the newborn pairs. Note that when the rabbits give birth, two pairs are born each time."],
+ ["*f*~*n*~ = *f*~*n* − 1~ + 2*f*~*n* − 2~.","The total population is made up of the pairs alive one month earlier (*f*~*n* − 1~) and the newborn pairs. Note that parents of newborn pairs must be at least three months old."],
+ ["*f*~*n*~ = *f*~*n* − 1~ + *f*~*n* − 2~ + *f*~*n* − 3~.","The total population is made up of the pairs alive one month earlier (*f*~*n* − 1~) and the newborn pairs. You need to determine the number of newborn pairs for month *n*."]
+ ]},
+{q:"Suppose a sequence *a*~1~, *a*~2~, *a*~3~, . . . begins 3, 7, 3, 7, 3, 7, . . . , and this pattern continues. Which of the following is a recurrence relation for this sequence?",
+ a:[3],
+ o:[
+ ["*a*~*n*~ = *a*~*n* − 1~ ± 4.","This does not uniquely define terms in a sequence. For example, if *a*~1~ = 3, then *a*~2~ is equal to both 7 and −1. You need to take the previous term and alternately add 4 and subtract 4."],
+ ["*a*~*n*~ = *a*~*n* − 1~ + 4.","This recurrence relation keeps increasing the previous term by 4, yielding 3, 7, 11, 15, 19, 23, . . ."],
+ ["*a*~*n*~ = *a*~*n* − 1~ + (−2)^*n*^.","This recurrence relation alternately adds 4, subtracts 8, adds 16, subtracts 32, etc. You need to alternately add 4 and subtract 4."],
+ ["*a*~*n*~ = *a*~*n* − 1~ + 4(−1)^*n*^.","You alternately add 4 and subtract 4 by adding 4(−1)^*n*^."],
+ ["none of these.","One of the first four answers is correct. (If you found *a*~*n*~ = *a*~*n* − 2~, your recurrence relation is also correct. The same sequence can be generated by many different recurrence relations.)"]
+ ]}
+];
+
+const $ = id => document.getElementById(id);
+const L = 'ABCDE';
+let cur, picks, reviewing;
+
+function start(){ cur = 0; picks = DATA.map(() => null); reviewing = false;
+  $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); }
+
+function show(){
+  const d = DATA[cur], p = picks[cur];
+  $('count').textContent = 'Question ' + (cur+1) + ' of ' + DATA.length;
+  $('prog').style.width = ((cur+1)/DATA.length*100) + '%';
+  $('q').innerHTML = fmt(d.q);
+  $('note').textContent = '';
+  const box = $('opts'); box.innerHTML = '';
+  d.o.forEach((o,i) => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.disabled = p !== null;
+    b.innerHTML = '<b>' + L[i] + ')</b><span>' + fmt(o[0]) + '</span>';
+    if (p === i) { const ok = d.a.includes(i); b.classList.add(ok?'ok':'bad'); b.insertAdjacentHTML('beforeend','<span class="mark">'+(ok?'✓':'✗')+'</span>'); }
+    b.onclick = () => { picks[cur] = i; show(); };
+    box.appendChild(b);
+  });
+  const fb = $('fb');
+  if (p === null) fb.classList.add('hide');
+  else { const ok = d.a.includes(p);
+    fb.innerHTML = '<span class="tag '+(ok?'okt':'badt')+'">'+L[p]+') ['+(ok?'CORRECT':'INCORRECT')+']</span> ' + fmt(d.o[p][1]);
+    fb.classList.remove('hide'); }
+  $('prev').style.visibility = cur === 0 ? 'hidden' : 'visible';
+  $('next').textContent = cur === DATA.length-1 ? 'See results' : 'Next';
+}
+
+function results(){
+  const score = picks.filter((p,i) => p !== null && DATA[i].a.includes(p)).length;
+  $('sc').textContent = score; $('tot').textContent = DATA.length;
+  $('quiz').classList.add('hide'); $('result').classList.remove('hide');
+}
+
+$('next').onclick = () => {
+  if (cur < DATA.length-1) { cur++; show(); return; }
+  if (picks.includes(null)) { $('note').textContent = 'Answer all the questions to see your score.'; return; }
+  results();
+};
+$('prev').onclick = () => { if (cur > 0) { cur--; show(); } };
+$('restart').onclick = $('again').onclick = start;
+$('review').onclick = () => { cur = 0; $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); };
+
+document.querySelectorAll('.intro div').forEach(n => n.innerHTML = fmt(n.innerHTML));
+start();
+</script>
+</body>
+</html>

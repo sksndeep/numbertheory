@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self Assessment: Mathematical Induction</title>
+<style>
+:root{--bg:#f3f6fa;--card:#fff;--ink:#1b2430;--mute:#5b6675;--line:#d5dce6;--accent:#1f4e8c;--ok:#1e7a46;--okbg:#e6f4ec;--bad:#b3261e;--badbg:#fbeae8}
+@media (prefers-color-scheme:dark){:root{--bg:#12171f;--card:#1a212b;--ink:#e8edf4;--mute:#9aa6b6;--line:#2c3644;--accent:#7fb0ee;--ok:#5fd08d;--okbg:#17301f;--bad:#ff8a80;--badbg:#38201e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Georgia,"Times New Roman",serif;padding:20px}
+main{max-width:760px;margin:0 auto}
+h1{font-size:1.5rem;margin:.2em 0 .4em}
+h1 span{color:var(--bad)}
+.intro{color:var(--mute);font-size:.95rem;border-left:3px solid var(--accent);padding-left:14px;margin-bottom:22px}
+.intro div{margin-bottom:.5em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px}
+.bar{display:flex;justify-content:space-between;align-items:center;font:600 .9rem system-ui,sans-serif;color:var(--mute);margin-bottom:12px}
+.track{height:4px;background:var(--line);border-radius:2px;flex:1;margin:0 14px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.q{font-size:1.1rem;margin-bottom:16px}
+.opt{display:flex;gap:12px;width:100%;text-align:left;background:var(--card);color:inherit;font:inherit;border:1.5px solid var(--line);border-radius:8px;padding:11px 14px;margin-bottom:10px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt:disabled{cursor:default}
+.opt b{color:var(--accent);min-width:1.4em}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.opt .mark{margin-left:auto;font:700 1rem system-ui;padding-left:8px}
+.opt.ok .mark{color:var(--ok)}.opt.bad .mark{color:var(--bad)}
+.fb{margin-top:14px;padding:14px 16px;border-radius:8px;font-size:.97rem;background:var(--bg);border:1px solid var(--line)}
+.fb p{margin:.4em 0}.fb .tag{font-weight:700;font-family:system-ui,sans-serif}
+.fb .okt{color:var(--ok)}.fb .badt{color:var(--bad)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.btn{font:600 .95rem system-ui,sans-serif;padding:9px 18px;border-radius:7px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+@media (prefers-color-scheme:dark){.btn{color:#0d1520}}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.note{font:.88rem system-ui,sans-serif;color:var(--bad);margin-top:12px;min-height:1.2em}
+.score{text-align:center;padding:20px 0}
+.score big{display:block;font-size:3rem;font-weight:700;color:var(--accent)}
+.hide{display:none}
+sup,sub{line-height:0}
+.intro ol{margin:.3em 0;padding-left:1.4em}
+</style>
+</head>
+<body>
+<main>
+<h1 id="title"><span>Self Assessment:</span> Mathematical Induction</h1>
+<div class="intro">
+<div>Mathematical induction is a technique for proving that a propositional function *P*(*n*) is true for all positive integers *n*. In order to construct a proof by mathematical induction you need to prove:<ol><li>basis step: show that *P*(1) is true, and</li><li>inductive step: show that if *k* is an arbitrary positive integer, then *P*(*k*) → *P*(*k* + 1) is true. (Note that the implication *P*(*k*) → *P*(*k* + 1) must hold for all positive integers.)</li></ol></div>
+<div>Once you prove (1) and (2), you can conclude that *P*(*n*) is true for all positive integers.</div>
+<div>In a sense, a proof by mathematical induction is a proof by cases. Showing (1) proves that the first case, *P*(1), is true. Showing (2) proves that a true case will always be followed by a true case: if a case, *P*(*k*), is true, then the next case, *P*(*k* + 1), must also be true. These two together show that all cases are true.</div>
+<div>A common error in proofs using mathematical induction is failing to prove that the basis case *P*(1) is true or incorrectly writing *P*(1). Establishing only the inductive step does not prove the desired result. Another common error is not correctly writing the statements *P*(*k*) and *P*(*k* + 1).</div>
+<div>Sometimes you want to prove a theorem that states that *P*(*n*) is true for all integers *n* with *n* ≥ *b*, where *b* is an integer other than 1. In such a case, you change the basis case from *P*(1) to *P*(*b*); the inductive step remains the same, except that you must show that it holds for all integers greater than or equal to *b*.</div>
+</div>
+
+<section class="card" id="quiz">
+<div class="bar"><span id="count"></span><div class="track"><i id="prog"></i></div><button class="btn ghost" id="restart">Restart quiz</button></div>
+<div class="q" id="q"></div>
+<div id="opts"></div>
+<div class="fb hide" id="fb" aria-live="polite"></div>
+<div class="nav"><button class="btn ghost" id="prev">Previous</button><button class="btn" id="next">Next</button></div>
+<div class="note" id="note"></div>
+</section>
+
+<section class="card hide" id="result">
+<div class="score">Your score is<big id="sc"></big>out of <span id="tot"></span></div>
+<div class="nav"><button class="btn ghost" id="review">Review answers</button><button class="btn" id="again">Restart quiz</button></div>
+</section>
+</main>
+
+<script>
+// Markup shorthand: *italic*  ^sup^  ~sub~
+const fmt = s => s.replace(/\*(.+?)\*/g,'<i>$1</i>').replace(/\^(.+?)\^/g,'<sup>$1</sup>').replace(/~(.+?)~/g,'<sub>$1</sub>');
+
+const DATA = [
+{q:"Which of the following steps would NOT prove that a given statement *P*(*n*) is true for all nonnegative integers *n*?",
+ a:[1],
+ o:[
+ ["First show that *P*(0) is true. Then assume that *P*(*k*) is true where *k* is a nonnegative integer and prove that *P*(*k* + 1) must also be true.","This is a valid way to show that *P*(*n*) is true for all nonnegative integers. It is the principle of mathematical induction."],
+ ["First show that *P*(0) is true. Then prove that *P*(*k*) → *P*(*k* + 1) is true for all integers *k* > 0.","This is not a valid proof technique because the correctness of *P*(1) cannot be established: the implication *P*(0) → *P*(1) is never proved."],
+ ["First show that *P*(0) and *P*(1) are true. Then prove that the following is true for all nonnegative integers: if *P*(*k*) is true, then *P*(*k* + 2) is true.","This is a valid proof method. The truth of *P*(0) can be used to show that *P*(2), *P*(4), *P*(6), . . . are true; that is, that *P*(*k*) is true for all even nonnegative integers. The truth of *P*(1) can be used to show that *P*(3), *P*(5), . . . are all true; that is, that *P*(*k*) is true for all odd positive integers. Together, these show that *P*(*n*) is true for all nonnegative integers."]
+ ]},
+{q:"Suppose that *P*(*n*) is the statement “*n* + 1 = *n* + 2”. What is wrong with the following “proof” that the statement *P*(*n*) is true for all nonnegative integers *n*? You assume that *P*(*k*) is true for some positive integer *k*, that is, that *k* + 1 = *k* + 2. Then you add 1 to both sides of this equation to obtain *k* + 2 = *k* + 3; therefore *P*(*k* + 1) is true. By the principle of mathematical induction *P*(*n*) is true for all nonnegative integers *n*.",
+ a:[2],
+ o:[
+ ["There is nothing wrong with this proof.","Because *P*(*n*) is not true, the proof must be incorrect. The inductive step is correct, but there is more to a proof by mathematical induction than the inductive step."],
+ ["The proof is incorrect because the statement used in the inductive hypothesis is incorrect.","The statement *P*(*k*) used in the inductive hypothesis can be any statement we wish. The implication *P*(*k*) → *P*(*k* + 1) is true for all nonnegative integers *k*. But there is more to the principle of mathematical induction than the inductive step."],
+ ["The proof is incorrect because there is no basis step.","There is no basis step in this proof. Even though the inductive step *P*(*k*) → *P*(*k* + 1) is true for all nonnegative integers *k*, the basis step *P*(0) is false."],
+ ["The proof is incorrect because you cannot add one to both sides of the equation in the inductive step.","It is a valid operation to add 1 to both sides of the equation in the inductive step. In fact, the inductive step is proved correctly. But there is more to the principle of mathematical induction than the inductive step."]
+ ]},
+{q:"Suppose you want to use mathematical induction to prove that 1 + 2 + 2^2^ + 2^3^ + . . . + 2^*n*^ = 2^*n* + 1^ − 1 for all positive integers *n*. Which of these is the correct statement to be proved in the basis step?",
+ a:[1],
+ o:[
+ ["1 = 2^0 + 1^ − 1.","This is the given statement with the nonnegative integer 0 used in place of *n*, but the problem asks that you work only with positive integers."],
+ ["1 + 2^1^ = 2^1 + 1^ − 1.","If *P*(*n*) is the given equation, the basis step asks you to prove *P*(1): 1 + 2^1^ = 2^1 + 1^ − 1."],
+ ["1 + 2^1^ + 2^2^ + . . . + 2^*n*^.","This is not a proposition, but only a mathematical expression. It makes no sense to say that it is true or false. The statement *P*(1) in the basis step must be a proposition and will not have the variable *n* in it."],
+ ["1 + 2^1^ + 2^2^ + . . . + 2^*n*^ = 2^*n* + 1^ − 1.","This is the general statement *P*(*n*), not the statement in the basis step. The basis step must be the first case of *P*(*n*) to be proved."],
+ ["2^0 + 1^ − 1.","This is not a proposition, but only a mathematical expression. It makes no sense to say that 2^0 + 1^ − 1 is true or false. *P*(1) must be a proposition."]
+ ]},
+{q:"Suppose you want to use the principle of mathematical induction to prove that 1 + 2 + 2^2^ + 2^3^ + . . . + 2^*n*^ = 2^*n* + 1^ − 1 for all nonnegative integers *n*. Which of these is the correct statement *P*(*k*) in the inductive hypothesis?",
+ a:[3],
+ o:[
+ ["1 + 2^1^ + 2^2^ + 2^3^ + . . . + 2^*k* + 1^ = 2^*k* + 2^ − 1.","This is the conclusion of the inductive step, not the hypothesis of the inductive step."],
+ ["2^*k* + 1^ − 1.","This is not a statement, but rather a mathematical expression. (You cannot say that 2^*k* + 1^ − 1 is true or false.) *P*(*k*) must be a statement."],
+ ["2^*k*^ = 2^*k* + 1^ − 1.","The left side of the equation must be the sum of all powers of 2, from 2^0^ to 2^*k*^, not just the highest power."],
+ ["1 + 2^1^ + 2^2^ + 2^3^ + . . . + 2^*k*^ = 2^*k* + 1^ − 1.","This equality is the statement *P*(*n*) with *k* used in place of *n*."],
+ ["1 + 2^1^ + 2^2^ + 2^3^ + . . . + 2^*k*^ + 2^*k* + 1^.","This is not a statement, but rather a mathematical expression. (You cannot say that it is true or false.) *P*(*k*) must be a statement."]
+ ]},
+{q:"Suppose you want to use mathematical induction to prove that 1 + 2 + 2^2^ + 2^3^ + . . . + 2^*n*^ = 2^*n* + 1^ − 1 for all positive integers *n*. Which of these is the correct implication *P*(*k*) → *P*(*k* + 1) to be used in the inductive step?",
+ a:[2],
+ o:[
+ ["1 + 2^1^ + 2^2^ + 2^3^ + . . . + 2^*k*^ → 1 + 2^1^ + 2^2^ + 2^3^ + . . . + 2^*k*^ + 2^*k* + 1^.","The hypothesis and the conclusion are not statements, and hence cannot be *P*(*k*) and *P*(*k* + 1). *P*(*k*) and *P*(*k* + 1) must be statements."],
+ ["2^*k*^ → 2^*k* + 1^.","The hypothesis 2^*k*^ and the conclusion 2^*k* + 1^ are not statements, and hence cannot be *P*(*k*) and *P*(*k* + 1). *P*(*k*) and *P*(*k* + 1) must be statements."],
+ ["1 + 2^1^ + 2^2^ + 2^3^ + . . . + 2^*k*^ = 2^*k* + 1^ − 1 → 1 + 2^1^ + 2^2^ + 2^3^ + . . . + 2^*k*^ + 2^*k* + 1^ = 2^*k* + 2^ − 1.","The hypothesis is the statement *P*(*k*) and the conclusion is the statement *P*(*k* + 1)."],
+ ["1 + 2^1^ + 2^2^ + 2^3^ + . . . + 2^*k*^ = 2^*k* + 1^ − 1 → 1 + 2^1^ + 2^2^ + 2^3^ + . . . + 2^*k*^ + 2^*k* + 1^ = 2^*k* + 1^ − 1 + 2^*k* + 1^.","Although *P*(*k*) is correct, the conclusion is not *P*(*k* + 1), but rather *P*(*k*) with the term 2^*k* + 1^ added on both sides. The conclusion must be *P*(*k* + 1)."]
+ ]},
+{q:"Suppose that you want to show that 1 + 2 + . . . + *n* = *n*(*n* + 1)/2 is true for all positive integers *n*. In a proof by mathematical induction of this formula, the statement *P*(*k*) in the inductive hypothesis is which of the following statements?",
+ a:[3],
+ o:[
+ ["1 + 2 + . . . + *k*.","This response is not correct. It does not have a truth value because it is a sum of terms involving the variable *k* and not an equation."],
+ ["*k*(*k* + 1)/2.","This response is not correct. It does not have a truth value because it is an expression involving the variable *k* and not an equation."],
+ ["1 + 2 + . . . + (*k* + 1).","This response is not correct. It does not have a truth value because it is a sum of terms involving the variable *k* and not an equation."],
+ ["1 + 2 + . . . + *k* = *k*(*k* + 1)/2.","The statement you need to prove is that 1 + 2 + . . . + *n* = *n*(*n* + 1)/2 for all positive integers *n*. In a proof using mathematical induction, let *P*(*n*) denote this statement. The statement in the inductive hypothesis is *P*(*k*): 1 + 2 + . . . + *k* = *k*(*k* + 1)/2."],
+ ["1 + 2 + . . . + (*k* + 1) = (*k* + 1)(*k* + 1 + 1)/2.","This response is the statement *P*(*k* + 1), not *P*(*k*). In the inductive step of the proof you show that the hypothesis *P*(*k*) implies the conclusion *P*(*k* + 1)."],
+ ["*k* = *k*(*k* + 1)/2.","This response is incorrect. The left side of the equation must be a sum of terms from 1 to *k*."]
+ ]},
+{q:"Which of the following describes a proof using the principle of mathematical induction?",
+ a:[1],
+ o:[
+ ["You assume that a first case, such as *P*(1), is true, and show that *P*(*k*) is true for all integers *k* > 1.","The inductive step shows that *P*(*k*) → *P*(*k* + 1) is true for all *k* ≥ 1. You do not directly show that *P*(*k*) is true for all *k* > 1. Also, you must prove the first case, not assume it."],
+ ["You show that the first case is true, and show if any case is true, the following case is true.","This response is equivalent to saying that you show that *P*(1) is true, and that *P*(*k*) → *P*(*k* + 1) is true for all *k* ≥ 1. This is a correct statement of the principle of mathematical induction."],
+ ["You assume that *P*(*k*) is true for all positive integers *k*, and show that *P*(*k* + 1) is true.","If you assume that *P*(*k*) is true for all positive integers *k*, you have assumed what you are trying to prove, which is never acceptable."],
+ ["You assume that there is a positive integer *k* such that *P*(*k*) is true and show that *P*(*k* + 1) is true.","This only shows that the statement is true in two cases: *k* and *k* + 1."],
+ ["You show that if there is a positive integer *k* such that *P*(*k*) is true, then *P*(1), *P*(2), . . . , *P*(*k* − 1) are all true.","This shows that the statement is true in a finite number of cases: 1, 2, 3, . . . , *k*. You need to show that the statement is true in an infinite number of cases: 1, 2, 3, . . . ."]
+ ]},
+{q:"Suppose you want to use mathematical induction to prove that 1^2^ + 2^2^ + . . . + *n*^2^ = *n*(*n* + 1)(2*n* + 1)/6 for all positive integers. To show *P*(*k*) implies *P*(*k* + 1) you assume the equality in the statement *P*(*k*) and",
+ a:[0],
+ o:[
+ ["Add (*k* + 1)^2^ to both sides.","<p>The statement *P*(*k*) says that 1^2^ + 2^2^ + . . . + *k*^2^ = *k*(*k* + 1)(2*k* + 1)/6 and *P*(*k* + 1) says that 1^2^ + 2^2^ + . . . + (*k* + 1)^2^ = (*k* + 1)(*k* + 2)(2*k* + 3)/6. The left sides differ only in that *P*(*k* + 1) has the extra term (*k* + 1)^2^. Therefore, to use *P*(*k*) to prove *P*(*k* + 1), add (*k* + 1)^2^ to both sides of *P*(*k*).</p><p>[Once you do this, you obtain 1^2^ + 2^2^ + . . . + *k*^2^ + (*k* + 1)^2^ = *k*(*k* + 1)(2*k* + 1)/6 + (*k* + 1)^2^. The right-hand side simplifies, after some algebraic manipulation, to (*k* + 1)(*k* + 2)(2*k* + 3)/6, showing that *P*(*k* + 1) is true.]</p>"],
+ ["Add *k*^2^ + 1 to both sides.","The left side of *P*(*k*) is a sum of squares. Write out *P*(*k* + 1) and notice that its left side is obtained from the left side of *P*(*k*) by adding the next square after *k*^2^."],
+ ["Add *k* + 1 to both sides.","The left side of *P*(*k*) is a sum of squares. Write out *P*(*k* + 1) and notice that its left side is obtained from the left side of *P*(*k*) by adding the next square after *k*^2^."],
+ ["Add *k* to both sides.","The left side of *P*(*k*) is a sum of squares. Write out *P*(*k* + 1) and notice that its left side is obtained from the left side of *P*(*k*) by adding the next square after *k*^2^."]
+ ]},
+{q:"Let *P*(*n*) be the statement “you can make *n* cents postage using 3-cent and 5-cent stamps.” Suppose you want to use the Principle of Mathematical Induction to show that *P*(*n*) is true for all *n* ≥ 8. You begin by proving *P*(8), which is true because 8 cents postage can be made with one 3-cent stamp and one 5-cent stamp. Which of the following will show that the implication *P*(*k*) → *P*(*k* + 1) in the inductive step is true for all *k* ≥ 8?",
+ a:[4],
+ o:[
+ ["Take the stamps that are used to make *k* cents postage and add a 3-cent stamp.","Adding a 3-cent stamp will make *k* + 3 cents postage, not *k* + 1 cents postage. That is, it will prove *P*(*k*) → *P*(*k* + 3), not *P*(*k*) → *P*(*k* + 1)."],
+ ["Take the stamps that are used to make *k* cents postage and add a 5-cent stamp.","Adding a 5-cent stamp will make *k* + 5 cents postage, not *k* + 1 cents postage. That is, it will prove *P*(*k*) → *P*(*k* + 5), not *P*(*k*) → *P*(*k* + 1)."],
+ ["Take the stamps that are used to make *k* cents postage, remove a 5-cent stamp and add a 3-cent stamp.","This technique will not work if the pile of stamps for *k* cents postage has no 5-cent stamps. (It also changes the postage by −2, not +1.)"],
+ ["Take the stamps that are used to make *k* cents postage, remove three 3-cent stamps and add two 5-cent stamps.","This technique will not work if the pile of stamps for *k* cents postage has fewer than three 3-cent stamps."],
+ ["None of these.","<p>None of these four techniques will show *P*(*k*) → *P*(*k* + 1). However, you can combine techniques of the kinds described to change *k* cents postage into *k* + 1 cents postage. There are two cases to consider:</p><p>1) The pile of stamps for *k* cents postage uses a 5-cent stamp. Remove a 5-cent stamp and add two 3-cent stamps. This adds one cent to the pile, making *k* + 1 cents postage.</p><p>2) The pile uses no 5-cent stamps, so it contains only 3-cent stamps. It cannot consist of only one or two 3-cent stamps because we are only considering postage of 8 cents and higher. Therefore, the pile has at least three 3-cent stamps. Remove three 3-cent stamps and add two 5-cent stamps, making *k* + 1 cents postage.</p><p>These two cases show that *P*(*k*) → *P*(*k* + 1).</p>"]
+ ]},
+{q:"If you give a proof by mathematical induction of the statement that 2^*n*^ ≥ *n*^2^, for all integers *n* ≥ 4, the basis step requires you to prove that which of the following is true?",
+ a:[4],
+ o:[
+ ["2^0^ ≥ 0^2^.","Although the inequality 2^0^ ≥ 0^2^ is correct (because 1 ≥ 0), it is not the statement in the basis step."],
+ ["2^1^ ≥ 1^2^.","Although the inequality 2^1^ ≥ 1^2^ is correct, it is not the statement in the basis step."],
+ ["2^2^ ≥ 2^2^.","Although the inequality 2^2^ ≥ 2^2^ is correct, it is not the statement in the basis step."],
+ ["2^3^ ≥ 3^2^.","The inequality 2^3^ ≥ 3^2^ is incorrect (8 is less than 9); it is not the statement in the basis step."],
+ ["2^4^ ≥ 4^2^.","The statement in the basis step is *P*(4): 2^4^ ≥ 4^2^."]
+ ]}
+];
+
+const $ = id => document.getElementById(id);
+const L = 'ABCDE';
+let cur, picks, reviewing;
+
+function start(){ cur = 0; picks = DATA.map(() => null); reviewing = false;
+  $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); }
+
+function show(){
+  const d = DATA[cur], p = picks[cur];
+  $('count').textContent = 'Question ' + (cur+1) + ' of ' + DATA.length;
+  $('prog').style.width = ((cur+1)/DATA.length*100) + '%';
+  $('q').innerHTML = fmt(d.q);
+  $('note').textContent = '';
+  const box = $('opts'); box.innerHTML = '';
+  d.o.forEach((o,i) => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.disabled = p !== null;
+    b.innerHTML = '<b>' + L[i] + ')</b><span>' + fmt(o[0]) + '</span>';
+    if (p === i) { const ok = d.a.includes(i); b.classList.add(ok?'ok':'bad'); b.insertAdjacentHTML('beforeend','<span class="mark">'+(ok?'✓':'✗')+'</span>'); }
+    b.onclick = () => { picks[cur] = i; show(); };
+    box.appendChild(b);
+  });
+  const fb = $('fb');
+  if (p === null) fb.classList.add('hide');
+  else { const ok = d.a.includes(p);
+    fb.innerHTML = '<span class="tag '+(ok?'okt':'badt')+'">'+L[p]+') ['+(ok?'CORRECT':'INCORRECT')+']</span> ' + fmt(d.o[p][1]);
+    fb.classList.remove('hide'); }
+  $('prev').style.visibility = cur === 0 ? 'hidden' : 'visible';
+  $('next').textContent = cur === DATA.length-1 ? 'See results' : 'Next';
+}
+
+function results(){
+  const score = picks.filter((p,i) => p !== null && DATA[i].a.includes(p)).length;
+  $('sc').textContent = score; $('tot').textContent = DATA.length;
+  $('quiz').classList.add('hide'); $('result').classList.remove('hide');
+}
+
+$('next').onclick = () => {
+  if (cur < DATA.length-1) { cur++; show(); return; }
+  if (picks.includes(null)) { $('note').textContent = 'Answer all the questions to see your score.'; return; }
+  results();
+};
+$('prev').onclick = () => { if (cur > 0) { cur--; show(); } };
+$('restart').onclick = $('again').onclick = start;
+$('review').onclick = () => { cur = 0; $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); };
+
+document.querySelectorAll('.intro div').forEach(n => n.innerHTML = fmt(n.innerHTML));
+start();
+</script>
+</body>
+</html>

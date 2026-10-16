@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self Assessment: Recursive Definitions</title>
+<!-- Configure MathJax to recognize single $ symbols for inline math -->
+<script>
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+        }
+    };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+:root{--bg:#f3f6fa;--card:#fff;--ink:#1b2430;--mute:#5b6675;--line:#d5dce6;--accent:#1f4e8c;--ok:#1e7a46;--okbg:#e6f4ec;--bad:#b3261e;--badbg:#fbeae8}
+@media (prefers-color-scheme:dark){:root{--bg:#12171f;--card:#1a212b;--ink:#e8edf4;--mute:#9aa6b6;--line:#2c3644;--accent:#7fb0ee;--ok:#5fd08d;--okbg:#17301f;--bad:#ff8a80;--badbg:#38201e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Georgia,"Times New Roman",serif;padding:20px}
+main{max-width:760px;margin:0 auto}
+h1{font-size:1.5rem;margin:.2em 0 .4em}
+h1 span{color:var(--bad)}
+.intro{color:var(--mute);font-size:.95rem;border-left:3px solid var(--accent);padding-left:14px;margin-bottom:22px}
+.intro div{margin-bottom:.5em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px}
+.bar{display:flex;justify-content:space-between;align-items:center;font:600 .9rem system-ui,sans-serif;color:var(--mute);margin-bottom:12px}
+.track{height:4px;background:var(--line);border-radius:2px;flex:1;margin:0 14px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.q{font-size:1.1rem;margin-bottom:16px}
+.opt{display:flex;gap:12px;width:100%;text-align:left;background:var(--card);color:inherit;font:inherit;border:1.5px solid var(--line);border-radius:8px;padding:11px 14px;margin-bottom:10px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt:disabled{cursor:default}
+.opt b{color:var(--accent);min-width:1.4em}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.opt .mark{margin-left:auto;font:700 1rem system-ui;padding-left:8px}
+.opt.ok .mark{color:var(--ok)}.opt.bad .mark{color:var(--bad)}
+.fb{margin-top:14px;padding:14px 16px;border-radius:8px;font-size:.97rem;background:var(--bg);border:1px solid var(--line)}
+.fb p{margin:.4em 0}.fb .tag{font-weight:700;font-family:system-ui,sans-serif}
+.fb .okt{color:var(--ok)}.fb .badt{color:var(--bad)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.btn{font:600 .95rem system-ui,sans-serif;padding:9px 18px;border-radius:7px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+@media (prefers-color-scheme:dark){.btn{color:#0d1520}}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.note{font:.88rem system-ui,sans-serif;color:var(--bad);margin-top:12px;min-height:1.2em}
+.score{text-align:center;padding:20px 0}
+.score big{display:block;font-size:3rem;font-weight:700;color:var(--accent)}
+.hide{display:none}
+sup,sub{line-height:0}
+</style>
+</head>
+<body>
+<main>
+<h1 id="title"><span>Self Assessment:</span> Recursive Definitions</h1>
+<div class="intro">
+<div>Sets, functions, and sequences can be defined recursively.</div>
+<div>A set *S* can be defined recursively by specifying one or more elements in *S*, and then giving a way of generating new elements in *S* from elements already known to be in *S*.</div>
+<div>A recursive definition of a function *f* : $\mathbb{N}$ → $\mathbb{R}$ gives an initial value (or values) of the function (such as *f*(0)) and a rule for generating a value *f*(*n*) in terms of one or more already known function values.</div>
+<div>A recursive definition of a sequence *a*~0~, *a*~1~, *a*~2~, . . . gives an initial value of the sequence (such as *a*~0~) and a rule for generating the term *a*~*n*~ using one or more already known terms of the sequence.</div>
+</div>
+
+<section class="card" id="quiz">
+<div class="bar"><span id="count"></span><div class="track"><i id="prog"></i></div><button class="btn ghost" id="restart">Restart quiz</button></div>
+<div class="q" id="q"></div>
+<div id="opts"></div>
+<div class="fb hide" id="fb" aria-live="polite"></div>
+<div class="nav"><button class="btn ghost" id="prev">Previous</button><button class="btn" id="next">Next</button></div>
+<div class="note" id="note"></div>
+</section>
+
+<section class="card hide" id="result">
+<div class="score">Your score is<big id="sc"></big>out of <span id="tot"></span></div>
+<div class="nav"><button class="btn ghost" id="review">Review answers</button><button class="btn" id="again">Restart quiz</button></div>
+</section>
+</main>
+
+<script>
+// Markup shorthand: *italic*  ^sup^  ~sub~
+const fmt = s => s.replace(/\*(.+?)\*/g,'<i>$1</i>').replace(/\^(.+?)\^/g,'<sup>$1</sup>').replace(/~(.+?)~/g,'<sub>$1</sub>');
+
+const DATA = [
+{q:"Which of the following is a recursive definition of the function *f* : $\\mathbb{N}$ → $\\mathbb{Z}$ where *f*(*n*) = *n*^2^ ?",
+ a:[1],
+ o:[
+ ["*f*(*n*) = *n* *f*(*n* – 1) + 1, *f*(0) = 0.","This recursive definition yields *f*(1) = 1·*f*(0) + 1 = 1·0^2^ + 1 = 1 and *f*(2) = 2·*f*(1) + 1 = 2·1 + 1 = 3. But the formula for *f* says that *f*(2) = 2^2^ = 4. Thus, this recursive definition is not correct."],
+ ["*f*(*n*) = *f*(*n* – 1) + (2*n* – 1), *f*(0) = 0.","<p>The first few function values of *f*(*n*) = *n*^2^ are 0, 1, 4, 9, 16, 25, . . . Each value is obtained by adding 1, 3, 5, 7, 9, . . . to the previous one. Each of these numbers has the form 2*n* – 1, so a reasonable guess is *f*(*n*) = *f*(*n* – 1) + (2*n* – 1).</p><p>To check it, substitute *f*(*n*) = *n*^2^ into the definition: *n*^2^ = (*n* – 1)^2^ + (2*n* – 1). The right side equals (*n*^2^ – 2*n* + 1) + (2*n* – 1) = *n*^2^.</p>"],
+ ["*f*(*n*) = *f*(*n* – 1)^2^, *f*(0) = 0.","This recursive definition yields *f*(1) = *f*(0)^2^ = 0, but the formula yields *f*(1) = 1^2^ = 1. Thus, this recursive definition is not correct."],
+ ["*f*(*n*) = *f*(*n* – 1) + (2*n* + 1), *f*(0) = 0.","This recursive definition yields *f*(1) = *f*(0) + (2·1 + 1) = 3, but the formula yields *f*(1) = 1^2^ = 1. Thus, this recursive definition is not correct."],
+ ["*f*(*n*) = 2*f*(*n* – 1) + 2.","This recursive definition yields *f*(1) = 2*f*(0) + 2 = 2·0 + 2 = 2, but *f*(1) = 1. Thus, this recursive definition is not correct."]
+ ]},
+{q:"For which of the following is the recursively defined set *S* equal to {*a*, 2*a*, 3*a*, 4*a*, 5*a*, . . .}?",
+ a:[3],
+ o:[
+ ["*a* ∈ *S*; *x* ∈ *S* → *x* + *x* ∈ *S*.","This recursive definition doubles elements; it generates *a*, *a* + *a*, (*a* + *a*) + (*a* + *a*), . . . , which is the set {*a*, 2*a*, 4*a*, 8*a*, . . .}. It does not generate an element such as 3*a*."],
+ ["*a* ∈ *S*; *x* ∈ *S* → *x*^2^ ∈ *S*.","This recursive definition squares elements; it generates *a*, *a*^2^, (*a*^2^)^2^, . . . , which is the set {*a*, *a*^2^, *a*^4^, *a*^8^, . . .}. It does not generate an element such as 2*a*."],
+ ["*a* ∈ *S*; *x* ∈ *S* → 2*x* ∈ *S*.","This recursive definition doubles elements; it generates *a*, 2*a*, 2(2*a*), . . . , which is the set {*a*, 2*a*, 4*a*, 8*a*, . . .}. It does not generate an element such as 3*a*."],
+ ["*a* ∈ *S*; *x* ∈ *S* → *a* + *x* ∈ *S*.","<p>We are given that *a* ∈ *S*. Using *x* ∈ *S* → *a* + *x* ∈ *S* with *a* in place of *x* gives 2*a* ∈ *S*. Using it with 2*a* in place of *x* gives 3*a* ∈ *S*. This can be continued to give {*a*, 2*a*, 3*a*, 4*a*, . . .} ⊆ *S*.</p><p>Every element of *S* has the form *na* for some positive integer *n*, so *S* = {*a*, 2*a*, 3*a*, 4*a*, . . .}.</p>"]
+ ]},
+{q:"Which of the following is a recursive definition for *a*~*n*~ = 4*n* + 3 ?",
+ a:[3],
+ o:[
+ ["*a*~*n*~ = 2*a*~*n* – 1~ + 1, *a*~0~ = 3.","This recursive definition generates the sequence that begins 3, 7, 15. But the formula for the terms generates 3, 7, 11. Thus, this response is not correct."],
+ ["*a*~*n*~ = *a*~*n* – 1~ + 4*n*, *a*~0~ = 3.","This recursive definition generates the sequence that begins 3, 7, 15. But the formula for the terms generates 3, 7, 11. Thus, this response is not correct."],
+ ["*a*~*n*~ = *a*~*n* – 2~ + 8, *a*~0~ = 3.","This definition starts with *a*~0~ = 3, but you cannot find *a*~1~ because *a*~1~ = *a*~–1~ + 8 and there is no term *a*~–1~."],
+ ["*a*~*n*~ = 2*a*~*n* – 1~ – *a*~*n* – 2~, *a*~0~ = 3, *a*~1~ = 7.","<p>This recursive definition generates 3, 7, 11, 15, 19, . . . , which agrees with the formula. To show it is correct, substitute *a*~*n*~ = 4*n* + 3, *a*~*n* – 1~ = 4(*n* – 1) + 3 and *a*~*n* – 2~ = 4(*n* – 2) + 3 into the definition and check that</p><p style='text-align:center'>4*n* + 3 = 2[4(*n* – 1) + 3] – [4(*n* – 2) + 3].</p><p>The right side simplifies to [8*n* – 8 + 6] – [4*n* – 8 + 3] = 4*n* + 3. Thus, this recursive definition generates the sequence whose rule is *a*~*n*~ = 4*n* + 3.</p>"]
+ ]},
+{q:"For which of the following is the set *S* equal to the set of positive integers not divisible by 3?",
+ a:[2],
+ o:[
+ ["1 ∈ *S*; *x* ∈ *S* → 2*x* + 2 ∈ *S*.","This recursive definition generates *S* = {1, 4, 10, 22, 46, 94, . . .}. The sequence is increasing and has not generated 2 or 5, for example."],
+ ["1 ∈ *S*; *x* ∈ *S* → *x* + 3 ∈ *S*.","This generates *S* = {1, 4, 7, 10, 13, 16, . . .}. None of the elements are divisible by 3, but not ALL positive integers not divisible by 3 are generated – for example, 2 is not."],
+ ["1 ∈ *S*; 2 ∈ *S*; *x* ∈ *S* → *x* + 3 ∈ *S*.","Beginning with *x* = 1, the definition generates 4, 7, 10, 13, 16, 19, . . . , each of the form 3*k* + 1 and hence not divisible by 3. Beginning with *x* = 2, it generates 5, 8, 11, 14, 17, 20, . . . , each of the form 3*k* + 2 and hence not divisible by 3. Because a positive integer is not divisible by 3 if and only if it has the form 3*k* + 1 or 3*k* + 2, this definition generates exactly the positive integers not divisible by 3."],
+ ["1 ∈ *S*; *x* ∈ *S* → 3*x* + 1 ∈ *S*.","This recursive definition generates 1, 4, 13, 40, . . . The sequence is increasing and has not generated 2 or 5, for example."]
+ ]},
+{q:"Which of the following is a valid recursive definition of a function *f* : $\\mathbb{N}$ → $\\mathbb{Z}$ ?",
+ a:[1],
+ o:[
+ ["*f*(0) = 0 and *f*(*n*) = 3/*f*(*n* – 1) for *n* ≥ 1.","*f*(1) cannot be generated by the recursive rule because it would require division by 0."],
+ ["*f*(0) = 1, *f*(1) = 1, and *f*(*n*) = *f*(*n* – 1) – 3*f*(*n* – 2) for *n* ≥ 2.","This function is well-defined. The values *f*(0) and *f*(1) unambiguously define *f*(2); the values *f*(1) and *f*(2) unambiguously define *f*(3), and so on."],
+ ["*f*(0) = 2, *f*(1) = 0, and *f*(*n*) = 5 + *f*(*n* – 1) for *n* ≥ 1.","This function is not well-defined. The initial conditions give *f*(1) = 0, but the recurrence also applies when *n* = 1 and gives *f*(1) = 5 + *f*(0) = 7. Hence *f*(1) equals both 0 and 7, which violates the definition of a function."],
+ ["*f*(0) = 1, and *f*(*n*) = 3*f*(*n* – 2) for *n* ≥ 1.","This function is not well-defined. To find *f*(1) you need *f*(1) = 3*f*(–1), but *f*(–1) is not defined."]
+ ]},
+{q:"Give a recursive definition for the sequence 1, 2, 3, 1, 2, 3, 1, 2, 3, . . . , assuming that the pattern “1, 2, 3” continues.",
+ a:[2],
+ o:[
+ ["*a*~*n*~ = (*a*~*n* – 1~ + 1) <b>mod</b> 4, *a*~0~ = 1.","This recursive definition begins by generating 1, 2, 3, 0, which differs from the given sequence."],
+ ["*a*~*n*~ = (*a*~*n* – 1~ + 1) <b>mod</b> 3, *a*~0~ = 1.","This recursive definition begins by generating 1, 2, 0, which differs from the given sequence."],
+ ["*a*~*n*~ = *a*~*n* – 1~ <b>mod</b> 3 + 1, *a*~0~ = 1.","This recursive definition begins by generating 1, 2, 3, 1. Once we see that the fourth term repeats the first, we know the pattern 1, 2, 3 continues."],
+ ["*a*~*n*~ = (*a*~*n* – 1~ + *a*~*n* – 2~) <b>mod</b> 3 + 1, *a*~0~ = 1, *a*~1~ = 2.","This recursive definition begins by generating 1, 2, 1, which differs from the given sequence."]
+ ]},
+{q:"Suppose *f*(*n*) has the recursive definition *f*(*n*) = 3/*f*(*n* – 1) + 1 and you know that *f*(3) = 7. What is the value of *f*(1) ?",
+ a:[2],
+ o:[
+ ["2/3.","Use the recursive definition to find *f*(2) in terms of *f*(3). Then use that result to find *f*(1)."],
+ ["1/2.","This is the value of *f*(2). You need to go back one step further to obtain *f*(1)."],
+ ["– 6.","<p>Because *f*(3) = 7, the definition says 7 = 3/*f*(2) + 1. Solving gives *f*(2) = 1/2.</p><p>Using the definition again, 1/2 = 3/*f*(1) + 1. Solving gives *f*(1) = – 6.</p>"],
+ ["– 6/5.","Use the recursive definition to find *f*(2) in terms of *f*(3). Then use that result to find *f*(1)."]
+ ]},
+{q:"If *f* : $\\mathbb{N}$ → $\\mathbb{R}$ is defined recursively by *f*(0) = 2, *f*(1) = 5, *f*(*n*) = 3*f*(*n* – 1) – 2*f*(*n* – 2), then *f*(4) is equal to which of the following?",
+ a:[1],
+ o:[
+ ["18.","<p>*f*(2) = 3·*f*(1) – 2·*f*(0) = 15 – 4 = 11.</p><p>*f*(3) = 3·*f*(2) – 2·*f*(1) = 33 – 10 = 23.</p><p>Then use *f*(3) and *f*(2) to obtain *f*(4).</p>"],
+ ["47.","<p>*f*(2) = 3·*f*(1) – 2·*f*(0) = 15 – 4 = 11.</p><p>*f*(3) = 3·*f*(2) – 2·*f*(1) = 33 – 10 = 23.</p><p>*f*(4) = 3·*f*(3) – 2·*f*(2) = 69 – 22 = 47.</p>"],
+ ["23.","Your response is *f*(3), not *f*(4). Since *f*(2) = 11 and *f*(3) = 23, use *f*(3) and *f*(2) to obtain *f*(4)."],
+ ["95.","Your response is *f*(5). You need *f*(4)."],
+ ["None of these.","One of the first four responses is correct. Use *f*(1) and *f*(0) to obtain *f*(2), then *f*(2) and *f*(1) to obtain *f*(3), then *f*(3) and *f*(2) to obtain *f*(4)."]
+ ]},
+{q:"For which of the following is the recursively defined set *S* equal to the set of odd positive integers?",
+ a:[0],
+ o:[
+ ["1 ∈ *S*; 3 ∈ *S*; *x* ∈ *S* → *x* + 4 ∈ *S*.","Beginning with *x* = 1, the recurrence generates 5, 9, 13, 17, 21, . . . Beginning with *x* = 3, it generates 7, 11, 15, 19, 23, . . . Every odd positive integer is generated, and no other numbers are, so this definition generates the odd positive integers."],
+ ["99 ∈ *S*; *x* ∈ *S* → *x* – 2 ∈ *S*.","This definition generates 99, 97, 95, . . . , 5, 3, 1, –1, –3, . . . , which is not the set of odd positive integers."],
+ ["2 ∈ *S*; *x* ∈ *S* → *x* + 2 ∈ *S*.","This definition generates even integers."],
+ ["1 ∈ *S*; *x* ∈ *S* → 2*x* + 1 ∈ *S*.","This definition generates 1, 3, 7, 15, 31, . . . , which are some of the odd positive integers, but not all of them."],
+ ["None of these.","One of the first four responses is correct."]
+ ]},
+{q:"For which of the following is the set *S* equal to {(*a*, *b*) : *a*, *b* nonnegative integers}?",
+ a:[0],
+ o:[
+ ["(0, 0) ∈ *S*; (*x*, *y*) ∈ *S* → (*x* + 1, *y*) ∈ *S* and (*x*, *y* + 1) ∈ *S*.","<p>Beginning with (0, 0) and repeatedly using (*x*, *y*) → (*x* + 1, *y*), we generate all pairs (*a*, 0) with *a* a nonnegative integer.</p><p>Using (1, 0) repeatedly in (*x*, *y*) → (*x*, *y* + 1) we generate all pairs (1, *b*); using (2, 0) we generate all pairs (2, *b*), and so on.</p><p>Continuing, we generate all pairs (*a*, *b*) with *a* ≥ 0 and *b* ≥ 0. Because we never generate a pair with *a* < 0 or *b* < 0, *S* is exactly the set of pairs of nonnegative integers.</p>"],
+ ["(0, 0) ∈ *S*; (*x*, *y*) ∈ *S* → (*x* + 1, *y* + 1) ∈ *S*.","This recursive definition generates only a “diagonal” {(0, 0), (1, 1), (2, 2), . . .}."],
+ ["(0, 0) ∈ *S*; (*x*, *y*) ∈ *S* → (*x* + *y*, *y*) ∈ *S* and (*x*, *x* + *y*) ∈ *S*.","Because *x* and *y* can only be 0, this recursive definition generates only the single element (0, 0)."],
+ ["None of these.","One of the first three responses is correct."]
+ ]}
+];
+
+const $ = id => document.getElementById(id);
+const L = 'ABCDE';
+let cur, picks, reviewing;
+
+function start(){ cur = 0; picks = DATA.map(() => null); reviewing = false;
+ $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); }
+
+function show(){
+ const d = DATA[cur], p = picks[cur];
+ $('count').textContent = 'Question ' + (cur+1) + ' of ' + DATA.length;
+ $('prog').style.width = ((cur+1)/DATA.length*100) + '%';
+ $('q').innerHTML = fmt(d.q);
+ $('note').textContent = '';
+ const box = $('opts'); box.innerHTML = '';
+ d.o.forEach((o,i) => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.disabled = p !== null;
+    b.innerHTML = '<b>' + L[i] + ')</b><span>' + fmt(o[0]) + '</span>';
+    if (p === i) { const ok = d.a.includes(i); b.classList.add(ok?'ok':'bad'); b.insertAdjacentHTML('beforeend','<span class="mark">'+(ok?'✓':'✗')+'</span>'); }
+    b.onclick = () => { picks[cur] = i; show(); };
+    box.appendChild(b);
+ });
+ const fb = $('fb');
+ if (p === null) fb.classList.add('hide');
+ else { const ok = d.a.includes(p);
+    fb.innerHTML = '<span class="tag '+(ok?'okt':'badt')+'">'+L[p]+') ['+(ok?'CORRECT':'INCORRECT')+']</span> ' + fmt(d.o[p][1]);
+    fb.classList.remove('hide'); }
+ $('prev').style.visibility = cur === 0 ? 'hidden' : 'visible';
+ $('next').textContent = cur === DATA.length-1 ? 'See results' : 'Next';
+ 
+ // Trigger MathJax to re-typeset newly loaded math elements
+ if (window.MathJax && window.MathJax.typesetPromise) {
+     window.MathJax.typesetPromise();
+ }
+}
+
+function results(){
+ const score = picks.filter((p,i) => p !== null && DATA[i].a.includes(p)).length;
+ $('sc').textContent = score; $('tot').textContent = DATA.length;
+ $('quiz').classList.add('hide'); $('result').classList.remove('hide');
+}
+
+$('next').onclick = () => {
+ if (cur < DATA.length-1) { cur++; show(); return; }
+ if (picks.includes(null)) { $('note').textContent = 'Answer all the questions to see your score.'; return; }
+ results();
+};
+$('prev').onclick = () => { if (cur > 0) { cur--; show(); } };
+$('restart').onclick = $('again').onclick = start;
+$('review').onclick = () => { cur = 0; $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); };
+
+document.querySelectorAll('.intro div').forEach(n => n.innerHTML = fmt(n.innerHTML));
+start();
+</script>
+</body>
+</html>

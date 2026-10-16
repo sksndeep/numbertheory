@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self Assessment: Negation of Quantified Statements</title>
+<style>
+:root{--bg:#f3f6fa;--card:#fff;--ink:#1b2430;--mute:#5b6675;--line:#d5dce6;--accent:#1f4e8c;--ok:#1e7a46;--okbg:#e6f4ec;--bad:#b3261e;--badbg:#fbeae8}
+@media (prefers-color-scheme:dark){:root{--bg:#12171f;--card:#1a212b;--ink:#e8edf4;--mute:#9aa6b6;--line:#2c3644;--accent:#7fb0ee;--ok:#5fd08d;--okbg:#17301f;--bad:#ff8a80;--badbg:#38201e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Georgia,"Times New Roman",serif;padding:20px}
+main{max-width:760px;margin:0 auto}
+h1{font-size:1.5rem;margin:.2em 0 .4em}
+h1 span{color:var(--bad)}
+.intro{color:var(--mute);font-size:.95rem;border-left:3px solid var(--accent);padding-left:14px;margin-bottom:22px}
+.intro div{margin-bottom:.5em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px}
+.bar{display:flex;justify-content:space-between;align-items:center;font:600 .9rem system-ui,sans-serif;color:var(--mute);margin-bottom:12px}
+.track{height:4px;background:var(--line);border-radius:2px;flex:1;margin:0 14px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.q{font-size:1.1rem;margin-bottom:16px}
+.opt{display:flex;gap:12px;width:100%;text-align:left;background:var(--card);color:inherit;font:inherit;border:1.5px solid var(--line);border-radius:8px;padding:11px 14px;margin-bottom:10px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt:disabled{cursor:default}
+.opt b{color:var(--accent);min-width:1.4em}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.opt .mark{margin-left:auto;font:700 1rem system-ui;padding-left:8px}
+.opt.ok .mark{color:var(--ok)}.opt.bad .mark{color:var(--bad)}
+.fb{margin-top:14px;padding:14px 16px;border-radius:8px;font-size:.97rem;background:var(--bg);border:1px solid var(--line)}
+.fb p{margin:.4em 0}.fb .tag{font-weight:700;font-family:system-ui,sans-serif}
+.fb .okt{color:var(--ok)}.fb .badt{color:var(--bad)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.btn{font:600 .95rem system-ui,sans-serif;padding:9px 18px;border-radius:7px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+@media (prefers-color-scheme:dark){.btn{color:#0d1520}}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.note{font:.88rem system-ui,sans-serif;color:var(--bad);margin-top:12px;min-height:1.2em}
+.score{text-align:center;padding:20px 0}
+.score big{display:block;font-size:3rem;font-weight:700;color:var(--accent)}
+.hide{display:none}
+sup,sub{line-height:0}
+</style>
+</head>
+<body>
+<main>
+<h1 id="title"><span>Self Assessment:</span> Negation of Quantified Statements</h1>
+<div class="intro">
+<div>Suppose *p* represents a quantified statement. The negation of *p* is written ¬*p*. The quantified statement *p* is true if and only if ¬*p* is false; *p* and ¬*p* are never simultaneously true and never simultaneously false. The negation of a statement with predicates and quantifiers is carried out as follows:</div>
+<div style="text-align:center">¬∀*x* *P*(*x*) ≡ ∃*x* ¬*P*(*x*) and ¬∃*x* *P*(*x*) ≡ ∀*x* ¬*P*(*x*).</div>
+<div>Note that the universal quantifier changes to an existential quantifier when a statement is negated. Similarly, the existential quantifier changes to a universal quantifier when a statement is negated.</div>
+</div>
+
+<section class="card" id="quiz">
+<div class="bar"><span id="count"></span><div class="track"><i id="prog"></i></div><button class="btn ghost" id="restart">Restart quiz</button></div>
+<div class="q" id="q"></div>
+<div id="opts"></div>
+<div class="fb hide" id="fb" aria-live="polite"></div>
+<div class="nav"><button class="btn ghost" id="prev">Previous</button><button class="btn" id="next">Next</button></div>
+<div class="note" id="note"></div>
+</section>
+
+<section class="card hide" id="result">
+<div class="score">Your score is<big id="sc"></big>out of <span id="tot"></span></div>
+<div class="nav"><button class="btn ghost" id="review">Review answers</button><button class="btn" id="again">Restart quiz</button></div>
+</section>
+</main>
+
+<script>
+// Markup shorthand: *italic*  ^sup^  ~sub~
+const fmt = s => s.replace(/\*(.+?)\*/g,'<i>$1</i>').replace(/\^(.+?)\^/g,'<sup>$1</sup>').replace(/~(.+?)~/g,'<sub>$1</sub>');
+
+const DATA = [
+{q:"Which of the following is the negation of the following statement: “Everyone in the class except Lee has a laptop computer.”",
+ a:[0],
+ o:[
+ ["Someone in the class other than Lee does not have a laptop computer or Lee has a laptop computer.","The given statement is a conjunction: all students in the class (other than Lee) have laptop computers AND Lee does not have a laptop computer. This has the form *p* ∧ *q*. The negation has the form ¬*p* ∨ ¬*q*. The negation ¬*q* is “Lee has a laptop computer”. The statement *p* has a universal quantifier; its negation states that “it is false that all students in the class (other than Lee) have a laptop computer,” which is equivalent to “someone in the class (other than Lee) does not have a laptop computer.” Therefore the negation of the given statement is “Someone in the class other than Lee does not have a laptop computer, or Lee has a laptop computer.”"],
+ ["Lee and someone else in the class have a laptop computer.","The given statement is a conjunction: all students in the class (other than Lee) have laptop computers AND Lee does not have a laptop computer. To negate this statement, you need to use one of De Morgan’s laws. Also, note that the first part of the statement is a quantified statement, and therefore you will also need to use the rules for negating quantified statements."],
+ ["Lee is the only student in the class with a laptop computer.","The given statement is false if Lee has a laptop computer, but it is also false if someone in the class other than Lee does not have a laptop. To obtain the negation, note that the given statement is a conjunction: all students in the class (other than Lee) have laptop computers AND Lee does not have a laptop computer. To negate this statement, you need to use one of De Morgan’s laws and the rules for negating quantified statements."],
+ ["Someone in the class other than Lee does not have a laptop computer and Lee does not have a laptop computer.","If Lee has a laptop computer, the original statement and this response are both false. But a statement and its negation cannot both be false. To obtain the negation, note that the given statement is a conjunction: all students in the class (other than Lee) have laptop computers AND Lee does not have a laptop computer. To negate this conjunction, you need to use one of De Morgan’s laws."]
+ ]},
+{q:"Which of the following is the negation of ∀*x* (*P*(*x*) → *Q*(*x*))?",
+ a:[1],
+ o:[
+ ["∃*x* (*P*(*x*) → *Q*(*x*))","Negating a statement with a universal quantifier yields a statement of the form ∃*x* ¬(_____). You need to negate *P*(*x*) → *Q*(*x*). To negate it, first rewrite the implication as a disjunction: ¬*P*(*x*) ∨ *Q*(*x*)."],
+ ["∃*x* (*P*(*x*) ∧ ¬*Q*(*x*))","Negating a statement with a universal quantifier yields a statement of the form ∃*x* ¬(*P*(*x*) → *Q*(*x*)). To obtain the negation of *P*(*x*) → *Q*(*x*), rewrite it as ¬*P*(*x*) ∨ *Q*(*x*) and use one of De Morgan’s laws: ¬(*P*(*x*) → *Q*(*x*)) ≡ ¬(¬*P*(*x*) ∨ *Q*(*x*)) ≡ *P*(*x*) ∧ ¬*Q*(*x*)."],
+ ["∃*x* (¬*P*(*x*) → ¬*Q*(*x*))","Negating a statement with a universal quantifier yields a statement of the form ∃*x* ¬(_____). To negate *P*(*x*) → *Q*(*x*), first rewrite the implication as a disjunction: ¬*P*(*x*) ∨ *Q*(*x*)."],
+ ["∃*x* (¬*P*(*x*) ∧ *Q*(*x*))","Negating a statement with a universal quantifier yields a statement of the form ∃*x* ¬(_____). You must obtain the negation of *P*(*x*) → *Q*(*x*)."]
+ ]},
+{q:"The negation of ∀*x* ∃*y* (*x* < *y*) is",
+ a:[1],
+ o:[
+ ["∃*x* ∃*y* (*x* ≥ *y*).","To negate the given statement, you need to use the rules for negating statements with quantifiers. Begin by writing ¬∀*x* ∃*y* (*x* < *y*) ≡ ∃*x* ¬∃*y* (*x* < *y*) ≡ ⋯ ."],
+ ["∃*x* ∀*y* (*x* ≥ *y*).","The negation of ∀*x* ∃*y* (*x* < *y*) is ¬∀*x* ∃*y* (*x* < *y*) ≡ ∃*x* ¬∃*y* (*x* < *y*) ≡ ∃*x* ∀*y* ¬(*x* < *y*) ≡ ∃*x* ∀*y* (*x* ≥ *y*). (The given statement says that there is no largest number. Its negation says that there is such a number — *x* has the property that it is greater than or equal to all numbers.)"],
+ ["∀*x* ∃*y* (*x* ≥ *y*).","To negate the given statement, you need to use the rules for negating statements with quantifiers. Begin by writing ¬∀*x* ∃*y* (*x* < *y*) ≡ ∃*x* ¬∃*y* (*x* < *y*) ≡ ⋯ ."],
+ ["∃*x* ∀*y* (*x* < *y*).","You correctly began the negation process by changing the quantifiers. But you need to negate the predicate."]
+ ]},
+{q:"The negation of ∀*x* ∃*y* ∀*z* *Q*(*x*, *y*, *z*) is",
+ a:[1],
+ o:[
+ ["¬(∀*x* ∃*y* ∀*z* ¬*Q*(*x*, *y*, *z*)).","This response would be correct if the predicate were not negated. You need to use the rules for negating quantified statements three times. Begin by writing ¬(∀*x* ∃*y* ∀*z* *Q*(*x*, *y*, *z*)) ≡ ∃*x* ¬(∃*y* ∀*z* *Q*(*x*, *y*, *z*)) ≡ ⋯ ."],
+ ["∃*x* ∀*y* ∃*z* ¬*Q*(*x*, *y*, *z*).","You need to use the rules for negating quantified statements three times: ¬(∀*x* ∃*y* ∀*z* *Q*(*x*, *y*, *z*)) ≡ ∃*x* ¬(∃*y* ∀*z* *Q*(*x*, *y*, *z*)) ≡ ∃*x* ∀*y* ¬(∀*z* *Q*(*x*, *y*, *z*)) ≡ ∃*x* ∀*y* ∃*z* ¬*Q*(*x*, *y*, *z*)."],
+ ["∀*x* ∃*y* ∀*z* ¬*Q*(*x*, *y*, *z*).","You cannot simply negate the predicate. You need to use the rules for negating quantified statements three times. Begin by writing ¬(∀*x* ∃*y* ∀*z* *Q*(*x*, *y*, *z*)) ≡ ∃*x* ¬(∃*y* ∀*z* *Q*(*x*, *y*, *z*)) ≡ ⋯ ."]
+ ]},
+{q:"The negation of ∃*x* ∀*y* ¬*P*(*x*, *y*) is",
+ a:[2],
+ o:[
+ ["¬∀*x* ∃*y* ¬*P*(*x*, *y*).","You need to use the rule for negating statements with quantifiers. Begin by writing ¬∃*x* ∀*y* ¬*P*(*x*, *y*) ≡ ∀*x* ¬∀*y* ¬*P*(*x*, *y*) ≡ ⋯ ."],
+ ["∃*x* ∀*y* *P*(*x*, *y*).","You cannot simply negate the predicate. You need to use the rule for negating statements with quantifiers. Begin by writing ¬∃*x* ∀*y* ¬*P*(*x*, *y*) ≡ ∀*x* ¬∀*y* ¬*P*(*x*, *y*) ≡ ⋯ ."],
+ ["∀*x* ∃*y* *P*(*x*, *y*).","The rules for negating statements with quantifiers and the rule for double negation yield: ¬∃*x* ∀*y* ¬*P*(*x*, *y*) ≡ ∀*x* ¬∀*y* ¬*P*(*x*, *y*) ≡ ∀*x* ∃*y* ¬¬*P*(*x*, *y*) ≡ ∀*x* ∃*y* *P*(*x*, *y*)."],
+ ["∀*y* ∃*x* *P*(*x*, *y*).","You need to use the rule for negating statements with quantifiers. Begin by writing ¬∃*x* ∀*y* ¬*P*(*x*, *y*) ≡ ∀*x* ¬∀*y* ¬*P*(*x*, *y*) ≡ ⋯ ."]
+ ]},
+{q:"Which of the following is the negation of “No one plays tennis”?",
+ a:[1],
+ o:[
+ ["Everyone plays tennis.","Consider the statements “No one plays tennis” and “Everyone plays tennis.” These are both false if some people play tennis and others do not. But a statement and its negation cannot both be false — they must have opposite truth values."],
+ ["Someone plays tennis.","The negation states that it is false that no one plays tennis; i.e., there is at least one person who plays tennis. Using predicates and quantifiers, the original sentence can be written as ∀*x* ¬*T*(*x*). The negation is ¬∀*x* ¬*T*(*x*), which is equivalent to ∃*x* ¬¬*T*(*x*), which is ∃*x* *T*(*x*): “There is someone who plays tennis.”"],
+ ["Someone does not play tennis.","Consider the statements “No one plays tennis” and “Someone does not play tennis”. These are both true if no one plays tennis. But a statement and its negation cannot both be true — they must have opposite truth values."]
+ ]},
+{q:"Which of the following is the negation of “Everyone plays tennis”?",
+ a:[0],
+ o:[
+ ["Someone does not play tennis.","The negation states that it is false that everyone plays tennis; i.e., there is at least one person who does not play tennis. Using predicates and quantifiers, the original sentence can be written as ∀*x* *T*(*x*). The negation is ¬∀*x* *T*(*x*), which is equivalent to ∃*x* ¬*T*(*x*), or “there is someone who does not play tennis.”"],
+ ["No one plays tennis.","Consider the statements “Everyone plays tennis” and “No one plays tennis”. These are both false if some people play tennis and others do not. But a statement and its negation cannot both be false — they must have opposite truth values."],
+ ["At least one person plays tennis.","Consider the statements “Everyone plays tennis” and “At least one person plays tennis.” These are both true if everyone plays tennis. But a statement and its negation cannot both be true — they must have opposite truth values."]
+ ]},
+{q:"Which of the following is the negation of ∀*x* (*P*(*x*) ∧ *Q*(*x*))?",
+ a:[2],
+ o:[
+ ["∃*x* (*P*(*x*) ∧ *Q*(*x*))","Negating a statement with a universal quantifier yields a statement with an existential quantifier: ∃*x* ¬(_____). However, you must use one of De Morgan’s laws to negate *P*(*x*) ∧ *Q*(*x*)."],
+ ["∃*x* (¬*P*(*x*) ∨ *Q*(*x*))","Negating a statement with a universal quantifier yields a statement with an existential quantifier: ∃*x* ¬(_____). However, you must use one of De Morgan’s laws to obtain the negation of *P*(*x*) ∧ *Q*(*x*)."],
+ ["∃*x* (¬*P*(*x*) ∨ ¬*Q*(*x*))","Negating a statement with a universal quantifier yields a statement with an existential quantifier: ∃*x* ¬(*P*(*x*) ∧ *Q*(*x*)). The negation of the conjunction *P*(*x*) ∧ *Q*(*x*) is obtained using one of De Morgan’s laws: ¬*P*(*x*) ∨ ¬*Q*(*x*)."],
+ ["∃*x* (¬*P*(*x*) ∧ ¬*Q*(*x*))","Negating a statement with a universal quantifier does yield a statement with an existential quantifier: ∃*x* ¬(*P*(*x*) ∧ *Q*(*x*)). However, you must use one of De Morgan’s laws to obtain the negation of *P*(*x*) ∧ *Q*(*x*)."]
+ ]},
+{q:"Which of the following is the negation of “Someone did not go to the store”?",
+ a:[0],
+ o:[
+ ["Everyone went to the store.","The given statement has the form ∃*x* (¬*G*(*x*)), where *G*(*x*) is the statement “*x* went to the store.” Its negation is ¬∃*x* (¬*G*(*x*)) ≡ ∀*x* (¬¬*G*(*x*)) ≡ ∀*x* *G*(*x*), which means that everyone went to the store."],
+ ["No one went to the store.","The statements “Someone did not go to the store” and “No one went to the store” are both true if no one went to the store. But a statement and its negation cannot both be true at the same time."],
+ ["Someone went to the store.","The statements “Someone did not go to the store” and “Someone went to the store” are both true if there are two people, one of whom went to the store and one of whom did not. But a statement and its negation cannot both be true at the same time."]
+ ]},
+{q:"Which of the following is the negation of “Some bananas are ripe”?",
+ a:[1],
+ o:[
+ ["Some bananas are not ripe.","The given statement “Some bananas are ripe” and the response “Some bananas are not ripe” are both true if you have a bunch of bananas where at least one banana is ripe and one banana is not ripe. A statement and its negation cannot both be true at the same time."],
+ ["No bananas are ripe.","The given statement can be written as ∃*b* *R*(*b*), where *R*(*b*) means banana *b* is ripe. Its negation is ¬∃*b* *R*(*b*), which is equivalent to ∀*b* ¬*R*(*b*). This means that no banana is ripe."],
+ ["All bananas are ripe.","The given statement “Some bananas are ripe” and the response “All bananas are ripe” are both true if you have a bunch of bananas with all the bananas ripe. A statement and its negation cannot both be true at the same time."]
+ ]}
+];
+
+const $ = id => document.getElementById(id);
+const L = 'ABCDE';
+let cur, picks, reviewing;
+
+function start(){ cur = 0; picks = DATA.map(() => null); reviewing = false;
+  $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); }
+
+function show(){
+  const d = DATA[cur], p = picks[cur];
+  $('count').textContent = 'Question ' + (cur+1) + ' of ' + DATA.length;
+  $('prog').style.width = ((cur+1)/DATA.length*100) + '%';
+  $('q').innerHTML = fmt(d.q);
+  $('note').textContent = '';
+  const box = $('opts'); box.innerHTML = '';
+  d.o.forEach((o,i) => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.disabled = p !== null;
+    b.innerHTML = '<b>' + L[i] + ')</b><span>' + fmt(o[0]) + '</span>';
+    if (p === i) { const ok = d.a.includes(i); b.classList.add(ok?'ok':'bad'); b.insertAdjacentHTML('beforeend','<span class="mark">'+(ok?'✓':'✗')+'</span>'); }
+    b.onclick = () => { picks[cur] = i; show(); };
+    box.appendChild(b);
+  });
+  const fb = $('fb');
+  if (p === null) fb.classList.add('hide');
+  else { const ok = d.a.includes(p);
+    fb.innerHTML = '<span class="tag '+(ok?'okt':'badt')+'">'+L[p]+') ['+(ok?'CORRECT':'INCORRECT')+']</span> ' + fmt(d.o[p][1]);
+    fb.classList.remove('hide'); }
+  $('prev').style.visibility = cur === 0 ? 'hidden' : 'visible';
+  $('next').textContent = cur === DATA.length-1 ? 'See results' : 'Next';
+}
+
+function results(){
+  const score = picks.filter((p,i) => p !== null && DATA[i].a.includes(p)).length;
+  $('sc').textContent = score; $('tot').textContent = DATA.length;
+  $('quiz').classList.add('hide'); $('result').classList.remove('hide');
+}
+
+$('next').onclick = () => {
+  if (cur < DATA.length-1) { cur++; show(); return; }
+  if (picks.includes(null)) { $('note').textContent = 'Answer all the questions to see your score.'; return; }
+  results();
+};
+$('prev').onclick = () => { if (cur > 0) { cur--; show(); } };
+$('restart').onclick = $('again').onclick = start;
+$('review').onclick = () => { cur = 0; $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); };
+
+document.querySelectorAll('.intro div').forEach(n => n.innerHTML = fmt(n.innerHTML));
+start();
+</script>
+</body>
+</html>

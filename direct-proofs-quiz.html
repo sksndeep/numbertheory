@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self Assessment: Direct, Contraposition, and Contradiction Proofs</title>
+<style>
+:root{--bg:#f3f6fa;--card:#fff;--ink:#1b2430;--mute:#5b6675;--line:#d5dce6;--accent:#1f4e8c;--ok:#1e7a46;--okbg:#e6f4ec;--bad:#b3261e;--badbg:#fbeae8}
+@media (prefers-color-scheme:dark){:root{--bg:#12171f;--card:#1a212b;--ink:#e8edf4;--mute:#9aa6b6;--line:#2c3644;--accent:#7fb0ee;--ok:#5fd08d;--okbg:#17301f;--bad:#ff8a80;--badbg:#38201e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Georgia,"Times New Roman",serif;padding:20px}
+main{max-width:760px;margin:0 auto}
+h1{font-size:1.5rem;margin:.2em 0 .4em}
+h1 span{color:var(--bad)}
+.intro{color:var(--mute);font-size:.95rem;border-left:3px solid var(--accent);padding-left:14px;margin-bottom:22px}
+.intro div{margin-bottom:.5em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px}
+.bar{display:flex;justify-content:space-between;align-items:center;font:600 .9rem system-ui,sans-serif;color:var(--mute);margin-bottom:12px}
+.track{height:4px;background:var(--line);border-radius:2px;flex:1;margin:0 14px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.q{font-size:1.1rem;margin-bottom:16px}
+.opt{display:flex;gap:12px;width:100%;text-align:left;background:var(--card);color:inherit;font:inherit;border:1.5px solid var(--line);border-radius:8px;padding:11px 14px;margin-bottom:10px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt:disabled{cursor:default}
+.opt b{color:var(--accent);min-width:1.4em}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.opt .mark{margin-left:auto;font:700 1rem system-ui;padding-left:8px}
+.opt.ok .mark{color:var(--ok)}.opt.bad .mark{color:var(--bad)}
+.fb{margin-top:14px;padding:14px 16px;border-radius:8px;font-size:.97rem;background:var(--bg);border:1px solid var(--line)}
+.fb p{margin:.4em 0}.fb .tag{font-weight:700;font-family:system-ui,sans-serif}
+.fb .okt{color:var(--ok)}.fb .badt{color:var(--bad)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.btn{font:600 .95rem system-ui,sans-serif;padding:9px 18px;border-radius:7px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+@media (prefers-color-scheme:dark){.btn{color:#0d1520}}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.note{font:.88rem system-ui,sans-serif;color:var(--bad);margin-top:12px;min-height:1.2em}
+.score{text-align:center;padding:20px 0}
+.score big{display:block;font-size:3rem;font-weight:700;color:var(--accent)}
+.hide{display:none}
+sup,sub{line-height:0}
+</style>
+</head>
+<body>
+<main>
+<h1 id="title"><span>Self Assessment:</span> Direct, Contraposition, and Contradiction Proofs</h1>
+<div class="intro">
+<div>Frequently you have to prove a statement of the form “If . . ., then . . .”. If you need to do this, you have a variety of options on the type of proof you can try. Among them are a direct proof, a proof by contraposition, and a proof by contradiction.</div>
+<div>A direct proof of the implication *p* → *q* proceeds by assuming that *p* is true and showing that this implies that *q* must also be true. That is, you assume that the hypothesis is true and try to construct a valid argument that leads to the conclusion. When you try to prove a theorem of the form *p* → *q*, you usually try a direct proof as the first method of attack.</div>
+<div>A proof by contraposition of *p* → *q* is a direct proof of ¬*q* → ¬*p* (the contrapositive of *p* → *q*). Recall that *p* → *q* and its contrapositive are equivalent statements. The proof proceeds by assuming that *q* is false and showing that this implies that *p* must also be false. It is usually worthwhile to see whether a proof by contraposition will work once you can determine that there is no clear or easy direct proof. A proof by contraposition is often called an indirect proof.</div>
+<div>A proof by contradiction of *p* → *q* begins by assuming that *p* is true, but the conclusion *q* is false. If it can be shown that this leads to a contradiction, then whenever *p* is true, *q* must also be true.</div>
+<div>A theorem stated as a biconditional, *p* ↔ *q*, can be proved by showing that *p* → *q* and *q* → *p*. This is called an equivalence proof. To prove that three or more statements *p*~1~, *p*~2~, . . . , *p*~*n*~ are equivalent, you can prove *p*~1~ ↔ *p*~2~, *p*~2~ ↔ *p*~3~, . . . , *p*~*n* − 1~ ↔ *p*~*n*~. You can also prove enough of the implications so that all remaining implications can be obtained by “chaining together” some of the proved implications.</div>
+</div>
+
+<section class="card" id="quiz">
+<div class="bar"><span id="count"></span><div class="track"><i id="prog"></i></div><button class="btn ghost" id="restart">Restart quiz</button></div>
+<div class="q" id="q"></div>
+<div id="opts"></div>
+<div class="fb hide" id="fb" aria-live="polite"></div>
+<div class="nav"><button class="btn ghost" id="prev">Previous</button><button class="btn" id="next">Next</button></div>
+<div class="note" id="note"></div>
+</section>
+
+<section class="card hide" id="result">
+<div class="score">Your score is<big id="sc"></big>out of <span id="tot"></span></div>
+<div class="nav"><button class="btn ghost" id="review">Review answers</button><button class="btn" id="again">Restart quiz</button></div>
+</section>
+</main>
+
+<script>
+// Markup shorthand: *italic*  ^sup^  ~sub~
+const fmt = s => s.replace(/\*(.+?)\*/g,'<i>$1</i>').replace(/\^(.+?)\^/g,'<sup>$1</sup>').replace(/~(.+?)~/g,'<sub>$1</sub>');
+
+const DATA = [
+{q:"Which of these assertions is correct concerning the statement “If *x*^3^ is irrational, then *x* is irrational.”",
+ a:[1],
+ o:[
+ ["This statement is true, as can be shown most easily using a direct proof.","Although the statement is true, there is no immediate way to prove it using a direct proof. To begin a direct proof, we would assume that *x*^3^ is irrational, so that there do not exist integers *a* and *b* such that *x*^3^ = *a*/*b*. Trying to show that this implies *x* is irrational, that is, that there are no integers *c* and *d* such that *x* = *c*/*d*, is not easy."],
+ ["This statement is true, as can be shown most easily using a proof by contraposition.","A proof by contraposition can be constructed by assuming that *x* is not irrational, that is, that *x* is rational. Then there are integers *a* and *b* with *b* ≠ 0 such that *x* = *a*/*b*. This means that *x*^3^ = *a*^3^/*b*^3^. Hence *x*^3^ is also rational because it can be written as the quotient of two integers with the denominator not equal to zero."],
+ ["This statement is false because a counterexample can be found.","The given statement is true."]
+ ]},
+{q:"Suppose you want to prove the following statement for all integers *x* and *y*: “If *x* and *y* are even, then 3*x* + *y* is even.” Which of these is true?",
+ a:[1],
+ o:[
+ ["This statement can be proved easily using a direct proof and it can be proved easily using a proof by contraposition.","You are correct that the statement can be proved easily using a direct proof, but it cannot be proved easily using a proof by contraposition. For a direct proof, assume *x* and *y* are even, so *x* = 2*k* and *y* = 2*l* for some integers *k* and *l*. Then 3*x* + *y* = 3(2*k*) + 2*l* = 2(3*k* + *l*), which is even. A proof by contraposition would require showing “if 3*x* + *y* is odd, then *x* or *y* is odd.” Assuming 3*x* + *y* = 2*k* + 1, it is not easy to deduce that *x* or *y* is odd (without using a proof by contradiction). As a general rule, it is easier to begin with two simple assumptions and combine them into one statement than to begin with a single assumption and conclude with two statements."],
+ ["This statement can be proved easily using a direct proof, but it cannot be proved easily using a proof by contraposition.","<p>The statement can be proved easily using a direct proof. Assume *x* and *y* are even, so *x* = 2*k* and *y* = 2*l* for some integers *k* and *l*. Then 3*x* + *y* = 3(2*k*) + 2*l* = 2(3*k* + *l*), which is even.</p><p>A proof by contraposition is not easy to construct. You need to show “if 3*x* + *y* is odd, then *x* or *y* is odd.” Beginning with 3*x* + *y* = 2*k* + 1, it is not easy to deduce that either *x* or *y* is odd (without using a proof by contradiction).</p><p>As a general rule, it is easier to begin with two simple assumptions (such as “*x* is even” and “*y* is even”) and combine them to build one statement, than to begin with a single assumption (“3*x* + *y* is odd”) and conclude with two statements.</p>"],
+ ["This statement can be proved easily using a proof by contraposition, but it cannot be proved easily using a direct proof.","It is not easy to construct a proof by contraposition: you would need to show “if 3*x* + *y* is odd, then *x* or *y* is odd.” However, the statement can be proved easily using a direct proof. Assume *x* = 2*k* and *y* = 2*l*; then 3*x* + *y* = 2(3*k* + *l*), which is even."],
+ ["This statement cannot be proved easily using either a direct proof or a proof by contraposition.","The statement can be proved easily using a direct proof. Assume *x* = 2*k* and *y* = 2*l*; then 3*x* + *y* = 2(3*k* + *l*), which is even. You are correct that a proof by contraposition is not easy to construct."]
+ ]},
+{q:"Suppose you wish to give a direct proof of the theorem “If *n* + 1 is an odd integer, then *n* + 3 is an odd integer.” Which of these statements do you assume?",
+ a:[1],
+ o:[
+ ["*n* + 1 = 2*k* for some integer *k*.","In a direct proof of a theorem of the form *p* → *q*, you do not assume that *p* is false."],
+ ["*n* + 1 = 2*k* + 1 for some integer *k*.","In a direct proof of a theorem of the form *p* → *q*, you assume that *p* is true; that is, you assume that *n* + 1 is odd."],
+ ["*n* + 1 = 2*k*.","*n* + 1 = 2*k* is not even a proposition since *k* is a free variable. It would become a proposition by adding the words “for some integer *k*”, but then we would be assuming that *n* + 1 is even, not odd."],
+ ["*n* + 1 = 2*k* + 1.","*n* + 1 = 2*k* + 1 is not even a proposition since *k* is a free variable. It would become a proposition by adding the words “for some integer *k*”, and then it would also be the correct assumption we need to make: that *n* + 1 is odd."]
+ ]},
+{q:"Suppose you want to give a proof by contradiction of this result for all integers: “If *x* and *y* are odd, then 3*x* + 2*y* is odd.” What do you begin by assuming?",
+ a:[0],
+ o:[
+ ["*x* and *y* are odd, and 3*x* + 2*y* is even.","To give a proof by contradiction, you begin by assuming that the hypothesis is true and the conclusion is false. Here you assume that *x* and *y* are odd, and 3*x* + 2*y* is even."],
+ ["*x* and *y* are odd, and 3*x* + 2*y* is odd.","You assume that the hypothesis is true, that is, that *x* and *y* are odd. However, you cannot assume that the conclusion is true. You can never assume what you are trying to prove."],
+ ["3*x* + 2*y* is not odd.","This would be the assumption if a proof by contraposition were being given. But you are asked for a proof by contradiction."],
+ ["3*x* + 2*y* is odd.","This assumes what you are trying to show, which is never allowed."]
+ ]},
+{q:"Suppose you want to give a proof by contraposition of this result for all integers: “If *x* is odd and *y* is even, then *xy* is even.” What do you try to conclude?",
+ a:[0],
+ o:[
+ ["*x* is even or *y* is odd.","In a proof by contraposition, you assume that “*xy* is even” is false; that is, you assume “*xy* is odd.” You use this to conclude that “*x* is odd and *y* is even” is false. Using one of De Morgan’s laws to rewrite this, you obtain the conclusion “*x* is even or *y* is odd.”"],
+ ["*x* is even and *y* is odd.","In a proof by contraposition, you give a direct proof of the contrapositive. Begin by assuming that “*xy* is even” is false. What do you need to conclude?"],
+ ["*xy* is even.","This would be the conclusion for a direct proof. But a proof by contraposition is asked for."],
+ ["*x* is even and *y* is even.","In a proof by contraposition, you begin by assuming that the conclusion “*xy* is even” is false. That is, you assume “*xy* is odd.”"]
+ ]},
+{q:"Suppose you wish to prove the theorem “If *n* + 1 is an odd integer, then *n* + 3 is an odd integer.” Which of these statements is correct?",
+ a:[0],
+ o:[
+ ["This theorem can be proved easily using a direct proof and it can be proved easily using a proof by contraposition.","<p>A direct proof assumes that *n* + 1 is odd, so *n* + 1 = 2*k* + 1 for some integer *k*. Then *n* + 3 = 2*k* + 3 = 2(*k* + 1) + 1, which is odd because it has the form 2*t* + 1 with *t* = *k* + 1.</p><p>A proof by contraposition assumes that *n* + 3 is not odd, so it is even: *n* + 3 = 2*k* for some integer *k*. Then *n* + 1 = (*n* + 3) − 2 = 2*k* − 2 = 2(*k* − 1), so *n* + 1 is even, and consequently not odd.</p>"],
+ ["This theorem can be proved easily using a direct proof but it cannot be proved easily using a proof by contraposition.","This statement can be proved easily using a direct proof. However, you can also easily give a proof by contraposition: assume *n* + 3 is even, so *n* + 3 = 2*k*. Then *n* + 1 = 2*k* − 2 = 2(*k* − 1), so *n* + 1 is even, and consequently not odd."],
+ ["This theorem can be proved easily using a proof by contraposition but it cannot be proved easily using a direct proof.","This statement can be proved easily using a proof by contraposition. However, you can also easily give a direct proof: assume *n* + 1 = 2*k* + 1. Then *n* + 3 = 2(*k* + 1) + 1, which is odd."],
+ ["This theorem cannot be proved easily using either a direct proof or a proof by contraposition.","This statement can be proved easily using either a direct proof (assume *n* + 1 = 2*k* + 1; then *n* + 3 = 2(*k* + 1) + 1) or a proof by contraposition (assume *n* + 3 = 2*k*; then *n* + 1 = 2(*k* − 1))."]
+ ]},
+{q:"Suppose you want to prove the following theorem: If *x* and *y* are real numbers, then |*x* + *y*| ≤ |*x*| + |*y*|. What quantifiers on the two variables are understood?",
+ a:[0],
+ o:[
+ ["∀*x* ∀*y*, where the universe for *x* and *y* is the set of all real numbers.","The theorem applies to all pairs of real numbers."],
+ ["∃*x* ∃*y*, where the universe for *x* and *y* is the set of all real numbers.","This response says that you will prove the theorem by showing that it is true for one pair of numbers. The theorem should apply to more than one pair of numbers."],
+ ["∀*x* ∃*y*, where the universe for *x* and *y* is the set of all real numbers.","This response says that for every *x* you choose, you only need to prove the inequality for one value of *y*. You must allow the possibility that more than one value can be used for *y*, once a value of *x* is chosen."],
+ ["∃*x* ∀*y*, where the universe for *x* and *y* is the set of all real numbers.","This response says that it is enough to prove the result for a single value of *x*. You need to allow all values of *x*."]
+ ]},
+{q:"Consider the statement “If the product of two integers is even, then their sum is also even.” Which of the following assertions is correct?",
+ a:[3],
+ o:[
+ ["The statement is true and can be proved easily using either a direct proof or a proof by contraposition.","The given statement is false. Try to find a counterexample."],
+ ["The statement is true and can be proved most easily using a proof by contradiction.","The given statement is false. Try to find a counterexample."],
+ ["The statement is true and can be proved most easily using a proof by contraposition.","The given statement is false. Try to find a counterexample."],
+ ["The statement is false as can be shown by finding a counterexample.","For example, the pair of integers *m* = 2 and *n* = 3 produces a counterexample: the product 6 is even, but the sum 5 is odd."]
+ ]},
+{q:"Suppose you need to prove that four statements, numbered 1, 2, 3, 4, are equivalent. Which of the following lists of implications will show that the four statements are equivalent?",
+ a:[1],
+ o:[
+ ["1 → 2, 3 → 1, 3 → 2, 4 → 2, 3 → 4, 4 → 3.","To show that the four statements are equivalent, you need to show that *i* → *j* for all distinct *i* and *j* from 1 to 4. There is no way to link together any of the given implications to obtain 1 → 3."],
+ ["1 → 2, 1 → 3, 2 → 4, 3 → 4, 4 → 1.","These implications can be chained to give every *i* → *j*. For example, 1 → 2 → 4 and 1 → 3 → 4; from 4 you can get back to 1 (4 → 1), and from 1 you reach 2 and 3. So 2 → 4 → 1 → 3 gives 2 → 3, and 3 → 4 → 1 → 2 gives 3 → 2."],
+ ["1 → 2, 2 → 1, 3 → 4, 4 → 3.","To show that the four statements are equivalent, you need to show that *i* → *j* for all distinct *i* and *j* from 1 to 4. There is no way to link together any of the given implications to obtain 1 → 3."],
+ ["1 → 3, 2 → 1, 3 → 2, 4 → 1, 4 → 2, 4 → 3.","Observe that 4 never appears as the conclusion of any of the given implications, only as a premise. Therefore, no chain of the given implications can ever have 4 as a conclusion. Specifically, 3 → 4 cannot be obtained."]
+ ]},
+{q:"Suppose you wish to prove this statement: “If *n* is an integer, then *n* ≤ *n*^3^.” Which of the following is correct?",
+ a:[3],
+ o:[
+ ["The given statement is true and can be proved most easily using a direct proof.","The given statement is true if *n* is a nonnegative integer. However, there are other integers to consider."],
+ ["The given statement is true and can be proved most easily using a proof by contraposition.","The given statement is true if *n* is a nonnegative integer. However, there are other integers to consider."],
+ ["The given statement is true and can be proved most easily using a proof by contradiction.","The given statement is true if *n* is a nonnegative integer. However, there are other integers to consider."],
+ ["The given statement is false because a counterexample can be found.","Any negative integer is a counterexample. For example, −2 is a counterexample because (−2)^3^ = −8 < −2."]
+ ]},
+{q:"Suppose you want to give a proof by contraposition of this result for all integers: “If *x* is odd and *y* is even, then *x* + *y* is odd.” What do you begin by assuming?",
+ a:[3],
+ o:[
+ ["*x* is odd and *y* is even.","This would be the correct assumption if you are giving a direct proof. But a proof by contraposition is asked for."],
+ ["*x* is even and *y* is odd.","It is possible that you are trying to assume that the hypothesis is false, but that is never allowed in any proof. (Also, the negation of “*x* is odd and *y* is even” is “*x* is even or *y* is odd”, using one of De Morgan’s laws.)"],
+ ["*x* + *y* is odd.","You can’t assume the conclusion; you can never assume what you need to prove."],
+ ["*x* + *y* is even.","In constructing a proof by contraposition, you begin by assuming that the conclusion is false, that is, that *x* + *y* is even."]
+ ]},
+{q:"A number *y* is an additive inverse of *x* if *x* + *y* = 0. Suppose you want to prove that all real numbers have additive inverses. What quantifiers on the variables are understood?",
+ a:[2],
+ o:[
+ ["∀*x* ∀*y*, where the universe for *x* and *y* is the set of all real numbers.","This response says that every choice of two numbers yields a sum of 0, which is not true."],
+ ["∃*x* ∀*y*, where the universe for *x* and *y* is the set of all real numbers.","This response says that there is a value *x* such that *x* + *y* is always equal to 0. The value *y* depends on the choice of *x*."],
+ ["∀*x* ∃*y*, where the universe for *x* and *y* is the set of all real numbers.","You need to show: for every number, there is a second number such that the sum of the two numbers is 0. That is, for each number *x* there is a number *y* such that *x* + *y* = 0. Thus, the quantified statement to be proved is ∀*x* ∃*y* (*x* + *y* = 0)."],
+ ["∃*x* ∃*y*, where the universe for *x* and *y* is the set of all real numbers.","This response says that you only need to find a single number *x* and a single number *y* such that *x* + *y* = 0. The given statement applies to more than a single value of *x*."]
+ ]}
+];
+
+const $ = id => document.getElementById(id);
+const L = 'ABCDE';
+let cur, picks, reviewing;
+
+function start(){ cur = 0; picks = DATA.map(() => null); reviewing = false;
+  $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); }
+
+function show(){
+  const d = DATA[cur], p = picks[cur];
+  $('count').textContent = 'Question ' + (cur+1) + ' of ' + DATA.length;
+  $('prog').style.width = ((cur+1)/DATA.length*100) + '%';
+  $('q').innerHTML = fmt(d.q);
+  $('note').textContent = '';
+  const box = $('opts'); box.innerHTML = '';
+  d.o.forEach((o,i) => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.disabled = p !== null;
+    b.innerHTML = '<b>' + L[i] + ')</b><span>' + fmt(o[0]) + '</span>';
+    if (p === i) { const ok = d.a.includes(i); b.classList.add(ok?'ok':'bad'); b.insertAdjacentHTML('beforeend','<span class="mark">'+(ok?'✓':'✗')+'</span>'); }
+    b.onclick = () => { picks[cur] = i; show(); };
+    box.appendChild(b);
+  });
+  const fb = $('fb');
+  if (p === null) fb.classList.add('hide');
+  else { const ok = d.a.includes(p);
+    fb.innerHTML = '<span class="tag '+(ok?'okt':'badt')+'">'+L[p]+') ['+(ok?'CORRECT':'INCORRECT')+']</span> ' + fmt(d.o[p][1]);
+    fb.classList.remove('hide'); }
+  $('prev').style.visibility = cur === 0 ? 'hidden' : 'visible';
+  $('next').textContent = cur === DATA.length-1 ? 'See results' : 'Next';
+}
+
+function results(){
+  const score = picks.filter((p,i) => p !== null && DATA[i].a.includes(p)).length;
+  $('sc').textContent = score; $('tot').textContent = DATA.length;
+  $('quiz').classList.add('hide'); $('result').classList.remove('hide');
+}
+
+$('next').onclick = () => {
+  if (cur < DATA.length-1) { cur++; show(); return; }
+  if (picks.includes(null)) { $('note').textContent = 'Answer all the questions to see your score.'; return; }
+  results();
+};
+$('prev').onclick = () => { if (cur > 0) { cur--; show(); } };
+$('restart').onclick = $('again').onclick = start;
+$('review').onclick = () => { cur = 0; $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); };
+
+document.querySelectorAll('.intro div').forEach(n => n.innerHTML = fmt(n.innerHTML));
+start();
+</script>
+</body>
+</html>

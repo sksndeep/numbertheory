@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self Assessment: Quantified Statements</title>
+<style>
+:root{--bg:#f3f6fa;--card:#fff;--ink:#1b2430;--mute:#5b6675;--line:#d5dce6;--accent:#1f4e8c;--ok:#1e7a46;--okbg:#e6f4ec;--bad:#b3261e;--badbg:#fbeae8}
+@media (prefers-color-scheme:dark){:root{--bg:#12171f;--card:#1a212b;--ink:#e8edf4;--mute:#9aa6b6;--line:#2c3644;--accent:#7fb0ee;--ok:#5fd08d;--okbg:#17301f;--bad:#ff8a80;--badbg:#38201e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Georgia,"Times New Roman",serif;padding:20px}
+main{max-width:760px;margin:0 auto}
+h1{font-size:1.5rem;margin:.2em 0 .4em}
+h1 span{color:var(--bad)}
+.intro{color:var(--mute);font-size:.95rem;border-left:3px solid var(--accent);padding-left:14px;margin-bottom:22px}
+.intro div{margin-bottom:.5em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px}
+.bar{display:flex;justify-content:space-between;align-items:center;font:600 .9rem system-ui,sans-serif;color:var(--mute);margin-bottom:12px}
+.track{height:4px;background:var(--line);border-radius:2px;flex:1;margin:0 14px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.q{font-size:1.1rem;margin-bottom:16px}
+.opt{display:flex;gap:12px;width:100%;text-align:left;background:var(--card);color:inherit;font:inherit;border:1.5px solid var(--line);border-radius:8px;padding:11px 14px;margin-bottom:10px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt:disabled{cursor:default}
+.opt b{color:var(--accent);min-width:1.4em}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.opt .mark{margin-left:auto;font:700 1rem system-ui;padding-left:8px}
+.opt.ok .mark{color:var(--ok)}.opt.bad .mark{color:var(--bad)}
+.fb{margin-top:14px;padding:14px 16px;border-radius:8px;font-size:.97rem;background:var(--bg);border:1px solid var(--line)}
+.fb p{margin:.4em 0}.fb .tag{font-weight:700;font-family:system-ui,sans-serif}
+.fb .okt{color:var(--ok)}.fb .badt{color:var(--bad)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.btn{font:600 .95rem system-ui,sans-serif;padding:9px 18px;border-radius:7px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+@media (prefers-color-scheme:dark){.btn{color:#0d1520}}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.note{font:.88rem system-ui,sans-serif;color:var(--bad);margin-top:12px;min-height:1.2em}
+.score{text-align:center;padding:20px 0}
+.score big{display:block;font-size:3rem;font-weight:700;color:var(--accent)}
+.hide{display:none}
+sup,sub{line-height:0}
+</style>
+</head>
+<body>
+<main>
+<h1 id="title"><span>Self Assessment:</span> Quantified Statements</h1>
+<div class="intro">
+<div>If *P*(*x*) is a predicate, the truth value of *P*(*x*) depends on the value *x*, chosen from a given set called the universe of discourse. The predicate could be always true, sometimes true and sometimes false, or never true. We can describe when the predicate is true or false by using quantifiers.</div>
+<div>The statement ∀*x* *P*(*x*) says that *P*(*x*) is true for all *x* in the universe of discourse. The statement ∃*x* *P*(*x*) says that there is at least one *x* in the universe for which *P*(*x*) is true. You can use negation to say that a predicate is never true: ¬∃*x* *P*(*x*) ≡ ∀*x* ¬*P*(*x*). That is, there is no *x* for which *P*(*x*) is true, or, equivalently, no matter what *x* is chosen, *P*(*x*) is false.</div>
+<div>You can also write ¬∀*x* *P*(*x*) ≡ ∃*x* ¬*P*(*x*) to say that there is at least one *x* for which *P*(*x*) is false. That is, it is false that *P*(*x*) is always true.</div>
+<div>Predicates may involve more than one variable — for example, *P*(*x*, *y*) or *Q*(*x*, *y*, *z*). Quantifiers in such statements may be “nested” — for example, ∀*x* ∃*y* *P*(*x*, *y*), which means ∀*x* (∃*y* *P*(*x*, *y*)), or ∀*x* ∃*y* ∀*z* *Q*(*x*, *y*, *z*), which means ∀*x* (∃*y* (∀*z* *Q*(*x*, *y*, *z*))).</div>
+</div>
+
+<section class="card" id="quiz">
+<div class="bar"><span id="count"></span><div class="track"><i id="prog"></i></div><button class="btn ghost" id="restart">Restart quiz</button></div>
+<div class="q" id="q"></div>
+<div id="opts"></div>
+<div class="fb hide" id="fb" aria-live="polite"></div>
+<div class="nav"><button class="btn ghost" id="prev">Previous</button><button class="btn" id="next">Next</button></div>
+<div class="note" id="note"></div>
+</section>
+
+<section class="card hide" id="result">
+<div class="score">Your score is<big id="sc"></big>out of <span id="tot"></span></div>
+<div class="nav"><button class="btn ghost" id="review">Review answers</button><button class="btn" id="again">Restart quiz</button></div>
+</section>
+</main>
+
+<script>
+// Markup shorthand: *italic*  ^sup^  ~sub~
+const fmt = s => s.replace(/\*(.+?)\*/g,'<i>$1</i>').replace(/\^(.+?)\^/g,'<sup>$1</sup>').replace(/~(.+?)~/g,'<sub>$1</sub>');
+
+const DATA = [
+{q:"Consider the statement ∃*y* ∀*x* (*C*(*x*) → ¬*C*(*x*, *y*)), where *C*(*x*) means “*x* is a Computer Science Major”, *C*(*x*, *y*) means “*x* completed *y*”, the universe for *x* consists of all students and the universe for *y* consists of all homework assignments. Which of these statements is the English translation of the statement?",
+ a:[1],
+ o:[
+ ["There is a homework assignment that no one completed.","The original statement says that there is a homework assignment *y* with a certain property: ∀*x* (*C*(*x*) → ¬*C*(*x*, *y*)); that is, no Computer Science Major completed it. The conditional statement applies to Computer Science Majors, not to all students."],
+ ["There is a homework assignment that no Computer Science Major completed.","The original statement says that there is a homework assignment *y* with a certain property: ∀*x* (*C*(*x*) → ¬*C*(*x*, *y*)); that is, every Computer Science Major failed to complete it."],
+ ["Some Computer Science Major completed no homework assignments.","The original statement says that there is a homework assignment with a certain property: ∀*x* (*C*(*x*) → ¬*C*(*x*, *y*)). The existential quantifier applies to the homework assignment, not to a Computer Science Major."],
+ ["Every Computer Science Major failed to complete at least one homework assignment.","The original statement says that there is a single homework assignment with a certain property: ∀*x* (*C*(*x*) → ¬*C*(*x*, *y*)). The same assignment must work for every Computer Science Major."]
+ ]},
+{q:"Consider the statement ∀*x* ∃*y* (*M*(*x*) → *C*(*x*, *y*)), where *M*(*x*) means “*x* is a Mathematics Major”, *C*(*x*, *y*) means “*x* completed *y*”, the universe for *x* consists of all students and the universe for *y* consists of all computer projects. Which of these statements is the English translation of the statement?",
+ a:[2],
+ o:[
+ ["There is a computer project that every Mathematics Major completed.","The original statement does not require that it be the same computer project that every Mathematics Major completed."],
+ ["Every Mathematics Major completed every computer project.","The original statement does not require that every computer project be completed by every Mathematics Major."],
+ ["Every Mathematics Major completed at least one computer project.","The original statement says that no matter what Mathematics Major is selected, that person has completed at least one computer project."],
+ ["Some Mathematics Major failed to complete the entire set of computer projects.","The original statement does not claim that there is a Mathematics Major who failed to complete all projects. In fact, the given statement allows the possibility that every Mathematics Major did complete every computer project."],
+ ["Every computer project was completed by at least one Mathematics Major.","The original statement does not make an assertion about all computer projects."]
+ ]},
+{q:"Express the following statement in symbols: “Some Computer Science courses are not being taken by any Mathematics Major,” using the following: *M*(*x*) is the statement “*x* is a Mathematics Major”, *C*(*y*) is the statement “*y* is a Computer Science course”, *T*(*x*, *y*) is the statement “*x* is taking *y*”, the universe for *x* is the set of all students, and the universe for *y* is the set of all courses.",
+ a:[1],
+ o:[
+ ["∀*y* ∃*x* [*M*(*x*) ∧ (*C*(*y*) → ¬*T*(*x*, *y*))].","This response says that for every course *y* there is a student *x* who is a Mathematics Major and, if *y* is a Computer Science course, is not taking *y*. That is, for every Computer Science course, there is a Mathematics Major who is not taking the course. This does not rule out other Mathematics Majors being in the course. You need to begin by saying that “there is a Computer Science course such that . . .”."],
+ ["∃*y* ∀*x* [*C*(*y*) ∧ (*M*(*x*) → ¬*T*(*x*, *y*))].","This response says that there is a course *y* that is a Computer Science course and, if *x* is any Mathematics Major, then *x* is not taking *y*. This is exactly what the given statement says."],
+ ["∃*y* ∃*x* (*M*(*x*) ∧ *C*(*y*) ∧ ¬*T*(*x*, *y*)).","This response says that there is a Mathematics Major and a Computer Science course such that the Mathematics Major is not taking that particular course. You need to guarantee that no Mathematics Majors are taking this Computer Science course."],
+ ["∃*y* ∀*x* ¬*T*(*M*(*x*), *C*(*y*)).","You cannot use a predicate within a predicate. If you use the predicate *T*( _ , _ ), you can only use variables or constants in place of the blanks."]
+ ]},
+{q:"Express the following statement in symbols: “Every Mathematics Major is taking a Computer Science course,” using the following: *M*(*x*) is the statement “*x* is a Mathematics Major”, *C*(*y*) is the statement “*y* is a Computer Science course”, *T*(*x*, *y*) is the statement “*x* is taking *y*”, the universe for *x* is the set of all students, and the universe for *y* is the set of all courses.",
+ a:[0],
+ o:[
+ ["∀*x* ∃*y* [*M*(*x*) → (*C*(*y*) ∧ *T*(*x*, *y*))].","This response says that if *x* is any Mathematics Major, then there is a Computer Science course that *x* is taking. This is the given statement."],
+ ["∀*x* ∃*y* [*M*(*x*) ∧ *C*(*y*) ∧ *T*(*x*, *y*)].","This response asserts that every student *x* we choose is a Mathematics Major, which is not part of the given statement. The correct response says that “if the student *x* is a Mathematics Major, then . . .”."],
+ ["∀*x* ∃*y* [*M*(*x*) → *T*(*x*, *C*(*y*))].","This is incorrect since *T*(*x*, *C*(*y*)) is not an allowable expression. You cannot put a predicate within a predicate. If you write *T*(*x*, _ ), only a variable or a constant can be put in place of the blank."],
+ ["∃*y* ∀*x* [*M*(*x*) → (*T*(*x*, *y*) ∧ *C*(*y*))].","This response begins by saying that there is a course with a certain property, namely that it is a Computer Science course and is being taken by every Mathematics Major. But the given statement does not single out such a course; the course depends on the Mathematics Major selected."],
+ ["∀*y* ∃*x* (*M*(*x*) ∧ *C*(*y*) ∧ *T*(*x*, *y*)).","This response says that every course is a Computer Science course, which is not part of the given statement."]
+ ]},
+{q:"Express the following statement in symbols: “Some Computer Science Major is taking no courses,” using the following: *C*(*x*) is the statement “*x* is a Computer Science Major”, *T*(*x*, *y*) is the statement “*x* is taking *y*”, the universe for *x* is the set of all students, and the universe for *y* is the set of all courses.",
+ a:[0],
+ o:[
+ ["∃*x* ∀*y* (*C*(*x*) ∧ ¬*T*(*x*, *y*)).","This response says that there is a student *x* such that ∀*y* (*C*(*x*) ∧ ¬*T*(*x*, *y*)). That is, there is a Computer Science Major who is not taking any courses. This is equivalent to the original statement."],
+ ["∀*y* ∃*x* (*C*(*x*) ∧ ¬*T*(*x*, *y*)).","This response says that for every course we choose, there is a student such that *C*(*x*) ∧ ¬*T*(*x*, *y*). That is, for every course, there is a Computer Science Major who is not taking the course. It does not state that there is a Computer Science Major taking no courses."],
+ ["∀*x* ∃*y* (*C*(*x*) ∧ ¬*T*(*x*, *y*)).","This response says that for every student *x* we choose, *x* is a Computer Science Major. But we cannot assume that every student is a Computer Science Major."],
+ ["∀*x* ∀*y* (*T*(*x*, *y*) → ¬*C*(*x*)).","It is easiest to understand this response if we replace the implication by its contrapositive ∀*x* ∀*y* (*C*(*x*) → ¬*T*(*x*, *y*)). This says that if we take any Computer Science Major, then the student is not taking any courses, which is not equivalent to the given statement."]
+ ]},
+{q:"Express the following statement in symbols: “No Computer Science Major is taking any courses,” using the following: *C*(*x*) is the statement “*x* is a Computer Science Major”, *T*(*x*, *y*) is the statement “*x* is taking *y*”, the universe for *x* is the set of all students, and the universe for *y* is the set of all courses.",
+ a:[1],
+ o:[
+ ["∀*x* ∃*y* (*C*(*x*) → ¬*T*(*x*, *y*)).","This response says that for every Computer Science Major, there is a course which that Computer Science Major is not taking. It does not say that the Computer Science Major is taking no courses."],
+ ["¬∃*x* ∃*y* (*C*(*x*) ∧ *T*(*x*, *y*)).","This response says that there is no student *x* with the property ∃*y* (*C*(*x*) ∧ *T*(*x*, *y*)). That is, there is no student who is a Computer Science Major and is taking some course."],
+ ["∃*y* ∀*x* (*C*(*x*) ∧ ¬*T*(*x*, *y*)).","This response says that there is a course with the property ∀*x* (*C*(*x*) ∧ ¬*T*(*x*, *y*)). But this property says that all students are Computer Science Majors, which is not given in the original statement."],
+ ["∃*x* ∀*y* (*C*(*x*) ∧ ¬*T*(*x*, *y*)).","This response says that there is a student *x* such that ∀*y* (*C*(*x*) ∧ ¬*T*(*x*, *y*)). That is, there is a Computer Science Major who is not taking any courses. But this is not equivalent to the original statement."]
+ ]},
+{q:"Express the following statement in symbols: “Between every two distinct real numbers there is a third real number.” In the following choices, assume that the universe for *a*, *b*, and *c* consists of all real numbers.",
+ a:[2],
+ o:[
+ ["∀*a* ∀*b* ∃*c* ((*a* ≠ *b*) → (*a* < *c* < *b*)).","This response states that if *a* and *b* are distinct, then *c* is greater than *a* and also less than *b*. This guarantees a third number between the first two, but it assumes that *a* < *b*, which is not part of this response."],
+ ["∀*a* ∀*b* ∃*c* ((*a* < *c* < *b*) ∨ (*b* < *c* < *a*)).","This response states that *c* lies between *a* and *b*, but it makes the assumption that *a* and *b* were chosen to be unequal. But that is not part of this response."],
+ ["∀*a* ∀*b* ∃*c* [(*a* ≠ *b*) → ((*a* < *c* < *b*) ∨ (*b* < *c* < *a*))].","This response states that if *a* and *b* are distinct (which means that either *a* < *b* or *b* < *a*), then there is a number between *a* and *b*."],
+ ["∃*a* ∃*b* ∃*c* ((*a* < *c* < *b*) ∨ (*b* < *c* < *a*)).","This response says that there exist three numbers such that *c* lies between *a* and *b*. It does not take into account every possible choice of numbers *a* and *b*."],
+ ["∃*c* ∀*a* ∀*b* (*a* < *c* < *b*).","This response states that there is a number *c* with the property that *a* < *c* < *b* no matter what *a* and *b* you choose. But consider the case where *a* = 5 and *b* = 2. There is no number *c* such that 5 < *c* < 2."]
+ ]},
+{q:"Suppose *P*(*x*, *y*) is a predicate where the universe for *x* and *y* is {1, 2, 3}. Also suppose that the predicate is true in the following cases — *P*(1, 2), *P*(2, 1), *P*(2, 2), *P*(2, 3), *P*(3, 1), *P*(3, 2) — and false otherwise. Determine which of the following quantified statements is FALSE.",
+ a:[0],
+ o:[
+ ["∀*y* ∃*x* ¬*P*(*x*, *y*).","This statement is false. If you take *y* = 2, then none of *P*(1, 2), *P*(2, 2), and *P*(3, 2) are false."],
+ ["∃*y* ∀*x* *P*(*x*, *y*).","This statement is true. If you take *y* = 2, then *P*(1, 2), *P*(2, 2), and *P*(3, 2) are all true."],
+ ["∀*x* ∃*y* (*x* ≠ *y* ∧ *P*(*x*, *y*)).","This statement is true. For each *x* there is a corresponding *y* such that *x* ≠ *y* ∧ *P*(*x*, *y*). If *x* = 1, then (1 ≠ 2) ∧ *P*(1, 2) is true. If *x* = 2, then (2 ≠ 3) ∧ *P*(2, 3) is true. If *x* = 3, then (3 ≠ 1) ∧ *P*(3, 1) is true."],
+ ["∃*x* ∀*y* *P*(*x*, *y*).","This statement is true. Take *x* = 2. Then ∀*y* *P*(2, *y*) is true: *P*(2, 1), *P*(2, 2) and *P*(2, 3) are all true."]
+ ]},
+{q:"Express the following statement in symbols: “There is a nonnegative integer with the property that this integer is less than or equal to every nonnegative integer.” In the following choices, assume that the universe for *m* and *n* is the set of all nonnegative integers.",
+ a:[3],
+ o:[
+ ["∀*m* ∀*n* (*m* ≤ *n*).","This response says that no matter what nonnegative integers *m* and *n* you choose, *m* will be less than or equal to *n*. But this is not true if, for example, you pick *m* = 7 and *n* = 2. The correct response should begin by saying that “there is an integer . . .”."],
+ ["∀*n* ∃*m* (*m* ≤ *n*).","This response says that no matter what nonnegative integer *n* you choose, there is always a nonnegative integer *m* that is less than or equal to *n*. The value of *m* can depend on *n*; for example, if you choose *n* = 5, the number *m* could be 4, 3, 2, 1, or 0. But the problem is to express the fact that there is a single nonnegative integer that “always works”. The correct response should begin by saying that “there is an integer . . .”."],
+ ["∃*n* ∃*m* (*m* ≤ *n*).","This response says that there are integers *m* and *n* such that *m* ≤ *n*. The integers *m* = 8 and *n* = 13 are one such pair. It does not say that there is a single integer that simultaneously is less than or equal to all nonnegative integers. The correct response should begin by saying that “there is an integer . . .”."],
+ ["∃*m* ∀*n* (*m* ≤ *n*).","This statement says that there is an integer *m* with the property that ∀*n* (*m* ≤ *n*); that is, this integer *m* is less than or equal to all possible nonnegative integers you choose."]
+ ]},
+{q:"Which of these statements says that “Every number has exactly one additive inverse.”? Assume that the universe for all variables consists of all real numbers.",
+ a:[0],
+ o:[
+ ["∀*x* ∃*y* ∀*z* [(*x* + *y* = 0) ∧ ((*x* + *z* = 0) → (*y* = *z*))].","The first part of the predicate says that every number *x* has an additive inverse *y*. The second part says that if it also happens that *x* + *z* = 0, then the number *z* must be the same as the number *y*. This says that *x* has exactly one additive inverse."],
+ ["∀*x* ∀*y* ∃*z* (*x* + *y* = *x* + *z* = 0).","The first equality says that *x* + *y* = 0, no matter what *x* and *y* are chosen. This says that every number *y* is an additive inverse of *x*, which is clearly false."],
+ ["∀*x* ∃*y* (*x* + *y* = 0).","This statement says that every number *x* has an additive inverse *y*. But this response does not rule out the possibility that there is more than one additive inverse."],
+ ["∀*x* ∃*y* ∃*z* [(*x* + *y* = 0) ∧ (*x* + *z* = 0)].","This statement says that *y* and *z* are both additive inverses of *x*. However it does not imply that *x* has exactly one additive inverse."]
+ ]},
+{q:"Which of these statements says that if a number is positive and a second number is greater than the first number, then the second number is also positive?",
+ a:[1],
+ o:[
+ ["∀*x* ∃*y* ((*x* > 0) → (*y* > 0)).","This response says that for every number *x*, if *x* is positive, then there is a number *y* such that *y* is also positive. This is a true statement, but it does not guarantee that *y* > *x*. (For example, you could have *x* = *y*.) You need to have *y* > *x* as part of the hypothesis of the implication."],
+ ["∀*x* ∀*y* ([(*x* > 0) ∧ (*y* > *x*)] → *y* > 0).","This statement says that for all possible numbers *x* and *y*, if *x* is positive and *y* is greater than *x*, then *y* is also positive. This is the given statement."],
+ ["∀*x* ∀*y* ((*x* > 0) ∧ (*y* > *x*)).","This says that every possible *x* and *y* are positive, which is not true. You need to use an implication here: if *x* is positive, . . . ."],
+ ["∀*x* ∃*y* ((*x* > 0) → [(*y* > 0) ∧ (*y* > *x*)]).","This response says that if *x* is positive, then *y* is also positive and greater than *x*. But you have no guarantee that *y* is positive. You need to have *y* > 0 as part of the hypothesis of the implication, not part of the conclusion."]
+ ]},
+{q:"Which one of these statements is true? Assume that the universe for *x* and *y* consists of all real numbers.",
+ a:[4],
+ o:[
+ ["∀*x* ∃*y* (−*x* < *y* < *x*).","Consider what happens if *x* = 0: −0 < *y* < 0. This forces *y* to be greater than 0 and less than 0, which is an impossibility."],
+ ["∀*x* ∃*y* ((*x* ≠ 0) → (−*x* < *y* < *x*)).","This response is false. For example, consider *x* = −1. Then −1 ≠ 0 is true, but −(−1) < *y* < −1, or 1 < *y* < −1, is false for every *y*. (This response would be true if *x* had to be positive.) If *x* is negative, then *x* < −*x*, and there can be no *y* such that −*x* < *y* < *x*."],
+ ["∃*x* ∃*y* (*x* < *y* + 1 < *x* + 1 < *y*).","This response states that you can find *x* and *y* such that *x* < *y* + 1, *y* + 1 < *x* + 1, and *x* + 1 < *y* simultaneously hold. But *y* + 1 < *x* + 1 and *x* + 1 < *y* together imply that *y* + 1 < *y*, which can never be true."],
+ ["∃*y* ∀*x* (*x* ≤ *y* ≤ *x*^2^).","This is false. It is not necessarily true that *x* ≤ *x*^2^; for example, if you take *x* = 1/2, you obtain 1/2 ≤ *y* ≤ 1/4, which cannot happen. Alternately, no matter what number *y* you choose, you could always choose an *x* greater than *y*, which would mean that *x* ≤ *y* ≤ *x*^2^ is false."],
+ ["∀*x* ∃*y* (*x*^2^ ≤ *x* + *y*).","No matter what number *x* you choose, there is a number *y* such that *x*^2^ ≤ *x* + *y*. You could always take *y* to be −*x* + *x*^2^, in which case you would have *x*^2^ ≤ *x* − *x* + *x*^2^ = *x* + *y*."]
+ ]},
+{q:"Which of these statements is a correct translation of the statement “Every student in this class knows the Java programming language”, where *C*(*x*) is the statement “*x* is a student in this class” and *J*(*x*) is the statement “*x* knows Java”. Assume that the universe of discourse is the set of all people.",
+ a:[3],
+ o:[
+ ["∃*x* (*C*(*x*) → *J*(*x*)).","This says that there is a person *x* for which *C*(*x*) → *J*(*x*) is true; for example, someone who is not a student in this class. This is quite different from “Every student in this class knows the Java programming language.” In a class of 100 students, ∃*x* (*C*(*x*) → *J*(*x*)) is true when only one person in the class knows Java, while the given statement would be false in this case."],
+ ["∃*x* (*C*(*x*) ∧ *J*(*x*)).","This means that there is a person *x* such that *x* is in this class and *x* knows Java. It is true as long as there is one student in this class who knows Java; it does not mean that every student in this class knows Java."],
+ ["∀*x* (*C*(*x*) ∧ *J*(*x*)).","This means that for all people *x*, *x* is a student in this class and *x* knows Java. This is quite different from the statement that every student in your class knows Java."],
+ ["∀*x* (*C*(*x*) → *J*(*x*)).","This means that for every person *x*, the implication *C*(*x*) → *J*(*x*) is true. When *C*(*x*) is true, then *J*(*x*) must also be true. In other words, it says that if *x* is a student in this class, then *x* knows Java."],
+ ["∀*x* (*C*(*x*) ∨ *J*(*x*)).","This means that for every person *x*, either *x* is a student in this class or *x* knows Java. It does not say that if *x* is a student in this class, then *x* knows Java."]
+ ]},
+{q:"Suppose *P*(*x*, *y*) is a predicate where the universe for *x* and *y* is {1, 2, 3}. Also suppose that the predicate is true in the following cases — *P*(1, 3), *P*(2, 1), *P*(3, 1), *P*(3, 2), *P*(3, 3) — and false otherwise. Determine which of the following quantified statements is FALSE.",
+ a:[2],
+ o:[
+ ["∃*x* ∀*y* *P*(*x*, *y*).","This is a true statement. If you take *x* = 3, the three propositions *P*(3, 1), *P*(3, 2), and *P*(3, 3) are true."],
+ ["∀*x* ∃*y* *P*(*x*, *y*).","This is a true statement. For every *x* there is a corresponding *y* such that *P*(*x*, *y*) is true: for *x* = 1 you can use *y* = 3; for *x* = 2 you can use *y* = 1; and for *x* = 3 you can use *y* = 1, 2, or 3."],
+ ["∃*y* ∀*x* *P*(*x*, *y*).","This statement is false. There is no value *y* such that *P*(*x*, *y*) is true for all three possible values of *x*. If you use *y* = 1, *P*(1, 1) is false; if you use *y* = 2, *P*(1, 2) is false; if you use *y* = 3, *P*(2, 3) is false."],
+ ["∀*y* ∃*x* *P*(*x*, *y*).","This is a true statement. For each value *y* there is a corresponding *x* such that *P*(*x*, *y*) is true: if *y* = 1, *P*(2, 1) is true; if *y* = 2, *P*(3, 2) is true; if *y* = 3, *P*(1, 3) is true."]
+ ]},
+{q:"Suppose *P*(*x*, *y*, *z*) is a predicate where the universe for *x*, *y*, and *z* is {1, 2}. Also suppose that the predicate is true in the following cases — *P*(1, 1, 1), *P*(1, 1, 2), *P*(2, 1, 1), *P*(2, 2, 2) — and false otherwise. Determine which of the following quantified statements is TRUE.",
+ a:[2],
+ o:[
+ ["∃*x* ∀*y* ∀*z* *P*(*x*, *y*, *z*).","This is false. Consider the two cases *x* = 1 and *x* = 2. The two resulting statements, ∀*y* ∀*z* *P*(1, *y*, *z*) and ∀*y* ∀*z* *P*(2, *y*, *z*), are false."],
+ ["∀*x* ∃*z* ∀*y* *P*(*x*, *y*, *z*).","This is false. Take *x* = 2. Then ∃*z* ∀*y* *P*(2, *y*, *z*) is false. If we try *z* = 1, then *P*(2, *y*, 1) is false for *y* = 2. If we try *z* = 2, *P*(2, *y*, 2) is false for *y* = 1."],
+ ["∃*x* ∃*y* ∀*z* *P*(*x*, *y*, *z*).","This is true. Consider the case where *x* = 1 and *y* = 1. In this case, *P*(1, 1, *z*) is true for *z* = 1 and *z* = 2."],
+ ["∃*x* ∃*z* ∀*y* *P*(*x*, *y*, *z*).","This is false. Consider the four cases: *x* = 1, *z* = 1; *x* = 1, *z* = 2; *x* = 2, *z* = 1; *x* = 2, *z* = 2. The four corresponding statements, ∀*y* *P*(1, *y*, 1), ∀*y* *P*(1, *y*, 2), ∀*y* *P*(2, *y*, 1), ∀*y* *P*(2, *y*, 2), are false."]
+ ]},
+{q:"Which of these statements is a correct translation of the statement “There is a student in this class who does not like sushi”, where *C*(*x*) is the statement “*x* is a student in this class” and *L*(*x*) is the statement “*x* likes sushi”. Assume that the universe of discourse is the set of all people.",
+ a:[1],
+ o:[
+ ["∃*x* (*C*(*x*) → ¬*L*(*x*)).","This says that there is a person *x* such that the implication *C*(*x*) → ¬*L*(*x*) is true. This implication is true if the hypothesis and conclusion are both true, or if the hypothesis is false (regardless of the conclusion). Thus it is true if some *x* is a student in this class who does not like sushi, or if some *x* is not a student in this class at all. So the response is true not only when there is a student in this class who does not like sushi, but also when there is someone not in this class, even if everyone in the class likes sushi."],
+ ["∃*x* (*C*(*x*) ∧ ¬*L*(*x*)).","This says that there is a person *x* such that *C*(*x*) is true and ¬*L*(*x*) is true, that is, such that *x* is a student in this class and *x* does not like sushi."],
+ ["∀*x* (*C*(*x*) ∧ ¬*L*(*x*)).","This says that for every person *x*, *C*(*x*) is true and ¬*L*(*x*) is true; that is, every person in the world is a student in this class and does not like sushi. This is quite different from the statement that there is someone in this class who does not like sushi."],
+ ["∀*x* (*C*(*x*) → ¬*L*(*x*)).","This says that for every person *x*, if *x* is a student in this class, then *x* does not like sushi. That is, no student in this class likes sushi, which is different from the statement that there is a student in this class who does not like sushi."]
+ ]}
+];
+
+const $ = id => document.getElementById(id);
+const L = 'ABCDE';
+let cur, picks, reviewing;
+
+function start(){ cur = 0; picks = DATA.map(() => null); reviewing = false;
+  $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); }
+
+function show(){
+  const d = DATA[cur], p = picks[cur];
+  $('count').textContent = 'Question ' + (cur+1) + ' of ' + DATA.length;
+  $('prog').style.width = ((cur+1)/DATA.length*100) + '%';
+  $('q').innerHTML = fmt(d.q);
+  $('note').textContent = '';
+  const box = $('opts'); box.innerHTML = '';
+  d.o.forEach((o,i) => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.disabled = p !== null;
+    b.innerHTML = '<b>' + L[i] + ')</b><span>' + fmt(o[0]) + '</span>';
+    if (p === i) { const ok = d.a.includes(i); b.classList.add(ok?'ok':'bad'); b.insertAdjacentHTML('beforeend','<span class="mark">'+(ok?'✓':'✗')+'</span>'); }
+    b.onclick = () => { picks[cur] = i; show(); };
+    box.appendChild(b);
+  });
+  const fb = $('fb');
+  if (p === null) fb.classList.add('hide');
+  else { const ok = d.a.includes(p);
+    fb.innerHTML = '<span class="tag '+(ok?'okt':'badt')+'">'+L[p]+') ['+(ok?'CORRECT':'INCORRECT')+']</span> ' + fmt(d.o[p][1]);
+    fb.classList.remove('hide'); }
+  $('prev').style.visibility = cur === 0 ? 'hidden' : 'visible';
+  $('next').textContent = cur === DATA.length-1 ? 'See results' : 'Next';
+}
+
+function results(){
+  const score = picks.filter((p,i) => p !== null && DATA[i].a.includes(p)).length;
+  $('sc').textContent = score; $('tot').textContent = DATA.length;
+  $('quiz').classList.add('hide'); $('result').classList.remove('hide');
+}
+
+$('next').onclick = () => {
+  if (cur < DATA.length-1) { cur++; show(); return; }
+  if (picks.includes(null)) { $('note').textContent = 'Answer all the questions to see your score.'; return; }
+  results();
+};
+$('prev').onclick = () => { if (cur > 0) { cur--; show(); } };
+$('restart').onclick = $('again').onclick = start;
+$('review').onclick = () => { cur = 0; $('result').classList.add('hide'); $('quiz').classList.remove('hide'); show(); };
+
+document.querySelectorAll('.intro div').forEach(n => n.innerHTML = fmt(n.innerHTML));
+start();
+</script>
+</body>
+</html>
